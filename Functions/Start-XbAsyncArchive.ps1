@@ -16,15 +16,19 @@ function Start-XbAsyncArchive {
         [datetime]
         $End,
 
+        [Parameter(Mandatory)]
         [string]
         $ClusterUrl,
 
+        [Parameter(Mandatory)]
         [string]
         $DatabaseName,
 
+        [Parameter(Mandatory)]
         [string]
         $TableName,
 
+        [Parameter(Mandatory)]
         [string]
         $TimestampColumnName
     )

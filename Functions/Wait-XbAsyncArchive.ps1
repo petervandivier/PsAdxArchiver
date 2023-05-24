@@ -10,15 +10,19 @@ function Wait-XbAsyncArchive {
         [int]
         $SleepSeconds = 60,
 
+        [Parameter(Mandatory)]
         [datetime]
         $Start,
 
+        [Parameter(Mandatory)]
         [datetime]
         $End,
 
+        [Parameter(Mandatory)]
         [string]
         $ClusterUrl,
 
+        [Parameter(Mandatory)]
         [string]
         $DatabaseName
     )

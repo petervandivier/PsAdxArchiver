@@ -21,9 +21,11 @@ function Receive-XbAsyncArchive {
         [string]
         $LogFile,
 
+        [Parameter(Mandatory)]
         [string]
         $ClusterUrl,
 
+        [Parameter(Mandatory)]
         [string]
         $DatabaseName
     )
