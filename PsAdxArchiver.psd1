@@ -17,6 +17,17 @@
             ModuleVersion = '0.0.9'
             Guid = '688fd570-0253-491b-beff-385ecc05cef2'
         }
+        @{
+            ModuleName = 'BurntToast'
+            ModuleVersion = '1.0.0'
+            Guid = '751a2aeb-a68f-422e-a2ea-376bdd81612a'
+        }
     )
-    FunctionsToExport = @()
+    FunctionsToExport = @(
+        'Export-XbTable'
+        'New-XbBatchBounds'
+        'Receive-XbAsyncArchive'
+        'Start-XbAsyncArchive'
+        'Wait-XbAsyncArchive'
+    )
 }
