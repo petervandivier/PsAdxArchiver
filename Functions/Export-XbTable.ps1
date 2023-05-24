@@ -81,6 +81,8 @@ function Export-XbTable {
         Receive-XbAsyncArchive `
             -OperationId $OperationId `
             -Prefix $prefix `
+            -ClusterUrl $ClusterUrl `
+            -DatabaseName $DatabaseName `
             @receiveSplat
     }
 }
