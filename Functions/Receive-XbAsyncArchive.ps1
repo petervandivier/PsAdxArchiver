@@ -37,10 +37,18 @@ function Receive-XbAsyncArchive {
 
     $operation = Invoke-AdxCmd @AdxConnection -Command ".show operations $OperationId"
 
+    $IsError = $false
+
     if(($operation).Count -ne 1){
-        Write-Error "$(Get-Date -Format o): Expected exactly one operation, but got '$(($operation).Count)'. Aborting await"
+        Write-Warning "$(Get-Date -Format o): Expected exactly one operation, but got '$(($operation).Count)'."
+        $IsError = $true
+    }elseif($operation.State -ne 'Completed'){
+        Write-Warning "$(Get-Date -Format o): Expected operation.State to be 'Completed', but got '$($operation.State)'."
+        $IsError = $true
+    }
+
+    if($IsError){
         $operation
-        return
     }
 
     $Context = New-AzStorageContext -StorageAccountName $StorageAccountName -UseConnectedAccount
