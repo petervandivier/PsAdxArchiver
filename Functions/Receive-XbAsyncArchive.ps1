@@ -40,10 +40,10 @@ function Receive-XbAsyncArchive {
     $IsError = $false
 
     if(($operation).Count -ne 1){
-        Write-Warning "$(Get-Date -Format o): Expected exactly one operation, but got '$(($operation).Count)'."
+        Write-Warning "$(Get-Date -Format u): Expected exactly one operation, but got '$(($operation).Count)'."
         $IsError = $true
     }elseif($operation.State -ne 'Completed'){
-        Write-Warning "$(Get-Date -Format o): Expected operation.State to be 'Completed', but got '$($operation.State)'."
+        Write-Warning "$(Get-Date -Format u): Expected operation.State to be 'Completed', but got '$($operation.State)'."
         $IsError = $true
     }
 
@@ -60,7 +60,7 @@ function Receive-XbAsyncArchive {
     $Aggregate = $Blobs | ForEach-Object {$_.Length} | Measure-Object -Sum 
 
     $receiver = [PsCustomObject]@{
-        Timestamp   = Get-Date -Format o
+        Timestamp   = Get-Date -Format u
         OperationId = $OperationId
         Duration    = $operation.Duration
         SizeBytes   = $Aggregate.Sum

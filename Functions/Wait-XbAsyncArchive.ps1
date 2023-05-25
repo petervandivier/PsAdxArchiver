@@ -50,11 +50,11 @@ function Wait-XbAsyncArchive {
         }
 
         if($operation.State -eq 'InProgress'){
-            Write-Host "$(Get-Date -Format o): Awaiting $OperationName" -ForegroundColor Yellow
+            Write-Host "$(Get-Date -Format u): Awaiting $OperationName" -ForegroundColor Yellow
             Start-Sleep -Seconds $SleepSeconds
             continue
         }elseif($operation.State -eq 'Completed'){
-            Write-Host "$(Get-Date -Format o): Completed $OperationName." -ForegroundColor Green
+            Write-Host "$(Get-Date -Format u): Completed $OperationName." -ForegroundColor Green
             New-BurntToastNotification -Text "Completed $OperationName"
             break
         }else{
