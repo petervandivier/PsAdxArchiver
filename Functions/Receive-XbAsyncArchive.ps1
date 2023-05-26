@@ -15,7 +15,9 @@ function Receive-XbAsyncArchive {
         $Container,
 
         [string]
-        $LogFile
+        $LogFile,
+
+        $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
     )
 
     $Context = New-AzStorageContext -StorageAccountName $StorageAccountName -UseConnectedAccount

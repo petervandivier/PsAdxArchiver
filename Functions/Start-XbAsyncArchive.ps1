@@ -30,7 +30,9 @@ function Start-XbAsyncArchive {
 
         [Parameter(Mandatory)]
         [string]
-        $TimestampColumnName
+        $TimestampColumnName,
+
+        $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
     )
 
     $startStr = $Start.ToString()
@@ -58,6 +60,8 @@ function Start-XbAsyncArchive {
     {
         Write-Warning "Returned OperationId: '$($command.OperationId)' is not a GUID. "
     }
+
+    Write-Verbose "$(Get-Date -Format u): Started Operation: '$($command.OperationId)', Start: '$Start', End: '$End'"
 
     [XbAsyncExportWaiter][PsCustomObject]@{
         OperationId = $command.OperationId
