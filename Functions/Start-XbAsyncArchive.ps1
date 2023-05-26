@@ -59,8 +59,8 @@ function Start-XbAsyncArchive {
         Write-Warning "Returned OperationId: '$($command.OperationId)' is not a GUID. "
     }
 
-    [PSCustomObject]@{
-        ExecutionResults = $command
+    [XbAsyncExportWaiter][PsCustomObject]@{
+        OperationId = $command.OperationId
         Start = $Start
         End = $End
     }
