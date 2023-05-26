@@ -89,7 +89,7 @@ function Export-XbTable {
             $Operation
         }
 
-        $Batches = $Batches | Wait-XbAsyncArchive -ClusterUrl $ClusterUrl -DatabaseName $DatabaseName 
+        $Batches = Wait-XbAsyncArchive -ClusterUrl $ClusterUrl -DatabaseName $DatabaseName -Waiters $Batches
 
         $Batches | ForEach-Object {
             $_ | Receive-XbAsyncArchive @receiveSplat

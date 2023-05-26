@@ -1,10 +1,15 @@
 
 function Wait-XbAsyncArchive {
+<#
+.Description
+    `ForEach-Object -Parallel` does not inherit caller scope. Therefore, `Invoke-AdxCmd` _must be_
+    on the PsModulePath (it will get autoloaded in each child process).
+#>
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory,ValueFromPipeline)]
-        [XbAsyncExportWaiter]
-        $Waiter,
+        [Parameter(Mandatory)]
+        [XbAsyncExportWaiter[]]
+        $Waiters,
 
         [ValidateRange(60,600)]
         [int]
@@ -19,14 +24,13 @@ function Wait-XbAsyncArchive {
         $DatabaseName
     )
 
-    begin{
+    $Waiters | ForEach-Object -Parallel {
         $AdxConnection = @{
-            ClusterUrl = $ClusterUrl
-            DatabaseName = $DatabaseName
+            ClusterUrl = $using:ClusterUrl
+            DatabaseName = $using:DatabaseName
         }
-    }
 
-    process{
+        $Waiter = $_
         $OperationName = "Operation: '$($Waiter.OperationId)'"
         if($Waiter.Start){
             $OperationName += ", Start: '$($Waiter.Start)'"
@@ -35,7 +39,7 @@ function Wait-XbAsyncArchive {
             $OperationName += ", End: '$($Waiter.End)'"
         }
 
-        :awaitCompletion while($true){
+        while($true){
             $operation = Invoke-AdxCmd @AdxConnection -Command ".show operations $($Waiter.OperationId)"
 
             if(($operation).Count -ne 1){
@@ -44,35 +48,30 @@ function Wait-XbAsyncArchive {
                 return
             }
 
-            switch($operation.State){
-                'InProgress'{
-                    Write-Verbose "$(Get-Date -Format u): Awaiting $OperationName. Current wait time: $($operation.Duration)" 
-                    Start-Sleep -Seconds $SleepSeconds
-                    continue
-                }
-                'Completed'{
-                    Write-Verbose "$(Get-Date -Format u): Completed $OperationName." 
-                    New-BurntToastNotification -Text "Completed $OperationName"
-                    break awaitCompletion
-                }
-                'Throttled'{
-                    Write-Warning "$(Get-Date -Format u): Throttled operation $OperationName" 
-                    Start-Sleep -Seconds $SleepSeconds
-                    # TODO: resubmit, needs Table & Column data from Start-Cmd AFAICT
-                    # $NewArchiveCmd = @{
-                    #     Start = $Waiter.Start
-                    #     End = $Waiter.End
-                    # }
-                    # $NewWaiter = Start-XbAsyncArchive @NewArchiveCmd
-                    # Write-Warning "$(Get-Date -Format u): Re-submitting operation for Start: '$($Waiter.Start)', End: '$($Waiter.End)'. Old OperationId: '$($Waiter.OperationId)', New OperationId: '$($NewWaiter.OperationId)'" 
-                    # $Waiter.OperationId = $NewWaiter.OperationId
-                    continue
-                }
-                default{
-                    Write-Error "Unexpected state occured: '$($operation.State)' for $OperationName"
-                    $operation | ConvertTo-Json -Depth 0 | Write-Error
-                    break awaitCompletion
-                }
+            if($operation.State -eq 'InProgress'){
+                Write-Verbose "$(Get-Date -Format u): Awaiting $OperationName. Current wait time: $($operation.Duration)" 
+                Start-Sleep -Seconds $SleepSeconds
+                continue
+            }elseif($operation.State -eq 'Completed') {
+                Write-Verbose "$(Get-Date -Format u): Completed $OperationName." 
+                New-BurntToastNotification -Text "Completed $OperationName"
+                break 
+            }elseif($operation.State -eq 'Throttled') {
+                Write-Warning "$(Get-Date -Format u): Throttled operation $OperationName" 
+                Start-Sleep -Seconds $SleepSeconds
+                # TODO: resubmit, needs Table & Column data from Start-Cmd AFAICT
+                # $NewArchiveCmd = @{
+                #     Start = $Waiter.Start
+                #     End = $Waiter.End
+                # }
+                # $NewWaiter = Start-XbAsyncArchive @NewArchiveCmd
+                # Write-Warning "$(Get-Date -Format u): Re-submitting operation for Start: '$($Waiter.Start)', End: '$($Waiter.End)'. Old OperationId: '$($Waiter.OperationId)', New OperationId: '$($NewWaiter.OperationId)'" 
+                # $Waiter.OperationId = $NewWaiter.OperationId
+                continue
+            }else{
+                Write-Error "Unexpected state occured: '$($operation.State)' for $OperationName"
+                $operation | ConvertTo-Json -Depth 0 | Write-Error
+                break 
             }
         }
         $Waiter.State = $operation.State
