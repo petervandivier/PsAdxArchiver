@@ -25,9 +25,13 @@ function Wait-XbAsyncArchive {
     )
 
     $Waiters | ForEach-Object -Parallel {
+        $ClusterUrl = $using:ClusterUrl
+        $DatabaseName = $using:DatabaseName
+        $SleepSeconds = $using:SleepSeconds
+
         $AdxConnection = @{
-            ClusterUrl = $using:ClusterUrl
-            DatabaseName = $using:DatabaseName
+            ClusterUrl = $ClusterUrl
+            DatabaseName = $DatabaseName
         }
 
         $Waiter = $_
