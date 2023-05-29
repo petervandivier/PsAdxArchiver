@@ -75,7 +75,7 @@ function Export-XbTable {
     $BatchCount = $Days.Count - 1
 
     for($IndexStart = 0; $IndexStart -lt $BatchCount; $IndexStart += $Parallel) {
-        $IndexEnd = $IndexStart + $Parallel
+        $IndexEnd = $IndexStart + $Parallel - 1
         if($IndexEnd -ge $BatchCount){
             $IndexEnd = $BatchCount - 1
         }
