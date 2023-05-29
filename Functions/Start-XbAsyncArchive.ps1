@@ -30,9 +30,7 @@ function Start-XbAsyncArchive {
 
         [Parameter(Mandatory)]
         [string]
-        $TimestampColumnName,
-
-        $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
+        $TimestampColumnName
     )
 
     $startStr = $Start.ToString()

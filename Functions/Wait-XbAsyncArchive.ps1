@@ -21,12 +21,11 @@ function Wait-XbAsyncArchive {
 
         [Parameter(Mandatory)]
         [string]
-        $DatabaseName,
-
-        $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
+        $DatabaseName
     )
 
     $Waiters | ForEach-Object -Parallel {
+        $VerbosePreference = $using:VerbosePreference
         $ClusterUrl = $using:ClusterUrl
         $DatabaseName = $using:DatabaseName
         $SleepSeconds = $using:SleepSeconds
