@@ -1,5 +1,13 @@
 
 function Export-XbTable {
+<#
+.Synopsis
+    Wrapper function to invoke Start/Wait/Receive for a given table & time range.
+
+.Parameter Parallel
+    Specifies number of concurrent executions to allow. 
+    Max 100. Defaults to 1 (one): *not* parallel.
+#>
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
@@ -40,10 +48,12 @@ function Export-XbTable {
 
         [Parameter(Mandatory)]
         [timespan]
-        $Step
-    )
+        $Step,
 
-    $days = New-XbBatchBounds -Start $Start -End $End -Step $Step
+        [ValidateRange(1,100)]
+        [int]
+        $Parallel = 1
+    )
 
     $receiveSplat = @{
         StorageAccountName = $StorageAccountName
@@ -58,31 +68,31 @@ function Export-XbTable {
         TimestampColumnName = $TimestampColumnName
     }
 
-    0 .. ($days.Count - 1) | ForEach-Object {
-        $start  = $days[$_].ToString()
-        $end    = $days[$_ + 1].ToString()
-        $prefix = "start=$($days[$_].ToString("yyyy-MM-dd"))"
+    $Days = New-XbBatchBounds -Start $Start -End $End -Step $Step
+    if($Days.Count -lt 2){
+        Write-Error "Count of batch boundaries must be at least 2, but was '$($Days.Count)'"
+    }
+    $BatchCount = $Days.Count - 1
 
-        $Operation = (
-            Start-XbAsyncArchive `
-                -Start $start `
-                -End $end `
-                @AdxTableSpec
-        ).ExecutionResults
-        $OperationId = $Operation.OperationId
+    for($IndexStart = 0; $IndexStart -lt $BatchCount; $IndexStart += $Parallel) {
+        $IndexEnd = $IndexStart + $Parallel - 1
+        if($IndexEnd -ge $BatchCount){
+            $IndexEnd = $BatchCount - 1
+        }
+        Write-Verbose "Initializing serial batch; IndexStart: '$IndexStart', IndexEnd: '$IndexEnd'"
+        $Batches = $IndexStart .. $IndexEnd | ForEach-Object {
+            $Start = Get-Date $Days[$_]     -Format "yyyy-MM-dd hh:mm:ss"
+            $End   = Get-Date $Days[$_ + 1] -Format "yyyy-MM-dd hh:mm:ss"
+            Write-Verbose "Initializing parallel batch; IndexPosition: '$_', Start: '$Start', End: '$End'"
+            $Operation = Start-XbAsyncArchive -Start $Start -End $End @AdxTableSpec
+            $Operation.Prefix = "start=$($Days[$_].ToString("yyyy-MM-dd"))"
+            $Operation
+        }
 
-        Wait-XbAsyncArchive `
-            -OperationId $OperationId `
-            -Start $start `
-            -End $end `
-            -ClusterUrl $ClusterUrl `
-            -DatabaseName $DatabaseName
+        $Batches = Wait-XbAsyncArchive -ClusterUrl $ClusterUrl -DatabaseName $DatabaseName -Waiters $Batches
 
-        Receive-XbAsyncArchive `
-            -OperationId $OperationId `
-            -Prefix $prefix `
-            -ClusterUrl $ClusterUrl `
-            -DatabaseName $DatabaseName `
-            @receiveSplat
+        $Batches | ForEach-Object {
+            $_ | Receive-XbAsyncArchive @receiveSplat
+        }
     }
 }

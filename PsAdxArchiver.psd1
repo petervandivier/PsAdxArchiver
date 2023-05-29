@@ -22,6 +22,11 @@
         #     ModuleVersion = '1.0.0'
         #     Guid = '751a2aeb-a68f-422e-a2ea-376bdd81612a'
         # }
+        @{
+            ModuleName = 'Az.Storage'
+            ModuleVersion = '5.6.0'
+            Guid = 'dfa9e4ea-1407-446d-9111-79122977ab20'
+        }
     )
     FunctionsToExport = @(
         'Export-XbTable'

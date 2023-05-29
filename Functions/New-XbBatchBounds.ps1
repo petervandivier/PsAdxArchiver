@@ -1,13 +1,19 @@
 
 function New-XbBatchBounds {
 <#
-.EXAMPLE
+.Synopsis
+    Returns an array of [datetime] values for each $Step betwen $Start & $End. 
+
+.Example
     $batches = @{
-        Start = [datetime]::Now.ToShortDateString()
-        End   = [datetime]::Now.AddDays(1).ToShortDateString()
+        Start = [datetime]::Now
+        End   = [datetime]::Now.AddDays(1)
         Step  = [timespan]"01:00:00"
     }
     New-XbBatch @batches
+
+.Outputs
+    [datetime[]]
 #>
     [CmdletBinding()]
     Param(
