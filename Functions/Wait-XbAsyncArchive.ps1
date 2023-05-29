@@ -58,7 +58,7 @@ function Wait-XbAsyncArchive {
                 Start-Sleep -Seconds $SleepSeconds
                 continue
             }elseif($operation.State -eq 'Completed') {
-                Write-Verbose "$(Get-Date -Format u): Completed $OperationName." 
+                Write-Host "$(Get-Date -Format u): Completed $OperationName." -ForegroundColor Green
                 New-BurntToastNotification -Text "Completed $OperationName"
                 break 
             }elseif($operation.State -eq 'Throttled') {
