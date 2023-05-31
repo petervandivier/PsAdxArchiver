@@ -81,11 +81,12 @@ function Export-XbTable {
         }
         Write-Verbose "Initializing serial batch; IndexStart: '$IndexStart', IndexEnd: '$IndexEnd'"
         $Batches = $IndexStart .. $IndexEnd | ForEach-Object {
-            $Start = Get-Date $Days[$_]     -Format "yyyy-MM-dd hh:mm:ss"
-            $End   = Get-Date $Days[$_ + 1] -Format "yyyy-MM-dd hh:mm:ss"
-            Write-Verbose "Initializing parallel batch; IndexPosition: '$_', Start: '$Start', End: '$End'"
-            $Operation = Start-XbAsyncArchive -Start $Start -End $End @AdxTableSpec
-            $Operation.Prefix = "start=$($Days[$_].ToString("yyyy-MM-dd"))"
+            $startStr = $Days[$_].ToString('u')
+            $endStr   = $Days[$_ + 1].ToString('u')
+            $prefix   = $Days[$_].ToString("yyyy-MM-dd")
+            Write-Verbose "Initializing parallel batch; IndexPosition: '$_', Start: '$startStr', End: '$endStr'"
+            $Operation = Start-XbAsyncArchive -Start $startStr -End $endStr @AdxTableSpec
+            $Operation.Prefix = "${TimestampColumnName}=${prefix}"
             $Operation
         }
 

@@ -33,8 +33,8 @@ function Start-XbAsyncArchive {
         $TimestampColumnName
     )
 
-    $startStr = $Start.ToString()
-    $endStr   = $End.ToString()
+    $startStr = $Start.ToString('u')
+    $endStr   = $End.ToString('u')
 
     $exportAsyncCmd = @(
         ".export async to table ext$TableName <|"
@@ -59,7 +59,7 @@ function Start-XbAsyncArchive {
         Write-Warning "Returned OperationId: '$($command.OperationId)' is not a GUID. "
     }
 
-    Write-Verbose "$(Get-Date -Format u): Started Operation: '$($command.OperationId)', Start: '$Start', End: '$End'"
+    Write-Verbose "$(Get-Date -Format u): Started Operation: '$($command.OperationId)', Start: '$startStr', End: '$endStr'"
 
     [XbAsyncExportWaiter][PsCustomObject]@{
         OperationId = $command.OperationId
