@@ -26,7 +26,7 @@ function Receive-XbAsyncArchive {
 
     $Aggregate = $Blobs | ForEach-Object {$_.Length} | Measure-Object -Sum 
 
-    $Waiter.Timestamp = Get-Date -Format u
+    $Waiter.Timestamp = [DateTimeOffset]::Now
     $Waiter.SizeBytes = $Aggregate.Sum
     $Waiter.NumFiles  = $Aggregate.Count
 

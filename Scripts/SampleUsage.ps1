@@ -15,8 +15,8 @@ $ClusterUrl          = 'https://help.kusto.windows.net;Fed=True'
 $DatabaseName        = 'Samples'
 $TableName           = 'StormEvents'
 $TimestampColumnName = 'StartTime'
-$Start               = '2007-01-01'
-$End                 = '2008-01-01'
+$Start               = '2007-01-01 00:00:00Z'
+$End                 = '2008-01-01 00:00:00Z'
 $Step                = [timespan]'1.00:00:00'
 $Parallel            = 4
 
