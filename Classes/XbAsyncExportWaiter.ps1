@@ -3,9 +3,9 @@
     Holds all the information about a single `.export async` command for transit through start/wait/receive.
 #>
 class XbAsyncExportWaiter {
-    [datetime]$Timestamp = [datetime]::Now
-    [ValidateNotNullOrEmpty()][datetime]$Start
-    [ValidateNotNullOrEmpty()][datetime]$End
+    [DateTimeOffset]$Timestamp = [DateTimeOffset]::Now
+    [ValidateNotNullOrEmpty()][DateTimeOffset]$Start
+    [ValidateNotNullOrEmpty()][DateTimeOffset]$End
     [string]$Prefix
     [ValidateNotNullOrEmpty()][guid]$OperationId
     [string]$State
@@ -13,7 +13,7 @@ class XbAsyncExportWaiter {
     [bigint]$SizeBytes
     [int]$NumFiles
     XbAsyncExportWaiter([PsCustomObject]$InputObject){
-        $this.Timestamp   = if($InputObject.Timestamp){$InputObject.Timestamp}else{[datetime]::Now}
+        $this.Timestamp   = if($InputObject.Timestamp){$InputObject.Timestamp}else{[DateTimeOffset]::Now}
         $this.Start       = $InputObject.Start
         $this.End         = $InputObject.End
         $this.Prefix      = $InputObject.Prefix

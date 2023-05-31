@@ -6,29 +6,42 @@ function New-XbBatchBounds {
 
 .Example
     $batches = @{
-        Start = [datetime]::Now
-        End   = [datetime]::Now.AddDays(1)
+        Start = [DateTimeOffset]'2023-01-01 00:00'
+        End   = [DateTimeOffset]'2023-01-01 03:00'
         Step  = [timespan]"01:00:00"
     }
-    New-XbBatch @batches
+    New-XbBatchBounds @batches
 
 .Outputs
-    [datetime[]]
+    [PsCustomObject[]]@{
+        [string]$StartStr
+        [string]$EndStr
+        [string]$Label
+    }
 #>
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory)]
-        [datetime]
+        [DateTimeOffset]
         $Start,
 
         [Parameter(Mandatory)]
-        [datetime]
+        [DateTimeOffset]
         $End,
 
         [Parameter(Mandatory)]
         [timespan]
         $Step
     )
+
+    if($Start.Offset -ne [timespan]'00:00'){
+        Write-Verbose "Parameter `$Start was supplied with localization '$($Start.Offset)'. Stripping and setting to UTC timezone *without* offset."
+        $Start = [DateTimeOffset]"$($Start.ToString('yyyy-MM-dd HH:mm:ss'))Z"
+    }
+    if($End.Offset -ne [timespan]'00:00'){
+        Write-Verbose "Parameter `$End was supplied with localization '$($End.Offset)'. Stripping and setting to UTC timezone *without* offset."
+        $End = [DateTimeOffset]"$($End.ToString('yyyy-MM-dd HH:mm:ss'))Z"
+    }
 
     if($Start -Gt $End){
         Write-Error "Start must come before end. You supplied: Start: '$Start', End: '$End'"
@@ -42,12 +55,20 @@ function New-XbBatchBounds {
 
     $boundary = $Start.Add(0)
 
-    [datetime[]]$bounds = $boundary
+    [DateTimeOffset[]]$bounds = $boundary
 
     while($End -Gt $boundary){
         $boundary = $boundary.Add($Step)
         $bounds += $boundary
     }
 
-    $bounds | Sort-Object
+    $bounds | Sort-Object | Where-Object {
+        $_ -Lt $End
+    } | ForEach-Object {
+        [PSCustomObject]@{
+            Start = $_.ToString('u')
+            End   = $_.Add($Step).ToString('u')
+            Label = $_.ToString('yyyy-MM-dd')
+        }
+    }
 }

@@ -39,11 +39,11 @@ function Export-XbTable {
         $TimestampColumnName,
 
         [Parameter(Mandatory)]
-        [datetime]
+        [DateTimeOffset]
         $Start,
 
         [Parameter(Mandatory)]
-        [datetime]
+        [DateTimeOffset]
         $End,
 
         [Parameter(Mandatory)]
@@ -68,11 +68,12 @@ function Export-XbTable {
         TimestampColumnName = $TimestampColumnName
     }
 
-    $Days = New-XbBatchBounds -Start $Start -End $End -Step $Step
-    if($Days.Count -lt 2){
-        Write-Error "Count of batch boundaries must be at least 2, but was '$($Days.Count)'"
+    $Bounds = New-XbBatchBounds -Start $Start -End $End -Step $Step
+    if($Bounds.Count -lt 1){
+        Write-Error "Count of batch boundaries must be at least 1, but was '$($Bounds.Count)'"
+        return
     }
-    $BatchCount = $Days.Count - 1
+    $BatchCount = $Bounds.Count
 
     for($IndexStart = 0; $IndexStart -lt $BatchCount; $IndexStart += $Parallel) {
         $IndexEnd = $IndexStart + $Parallel - 1
@@ -81,11 +82,12 @@ function Export-XbTable {
         }
         Write-Verbose "Initializing serial batch; IndexStart: '$IndexStart', IndexEnd: '$IndexEnd'"
         $Batches = $IndexStart .. $IndexEnd | ForEach-Object {
-            $Start = Get-Date $Days[$_]     -Format "yyyy-MM-dd hh:mm:ss"
-            $End   = Get-Date $Days[$_ + 1] -Format "yyyy-MM-dd hh:mm:ss"
-            Write-Verbose "Initializing parallel batch; IndexPosition: '$_', Start: '$Start', End: '$End'"
-            $Operation = Start-XbAsyncArchive -Start $Start -End $End @AdxTableSpec
-            $Operation.Prefix = "start=$($Days[$_].ToString("yyyy-MM-dd"))"
+            $startStr = $Bounds[$_].Start
+            $endStr   = $Bounds[$_].End
+            $prefix   = $Bounds[$_].Label
+            Write-Verbose "Initializing parallel batch; IndexPosition: '$_', Start: '$startStr', End: '$endStr'"
+            $Operation = Start-XbAsyncArchive -Start $startStr -End $endStr @AdxTableSpec
+            $Operation.Prefix = "${TimestampColumnName}=${prefix}"
             $Operation
         }
 
