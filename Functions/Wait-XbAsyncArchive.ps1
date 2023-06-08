@@ -13,7 +13,7 @@ function Wait-XbAsyncArchive {
 
         [ValidateRange(60,600)]
         [int]
-        $SleepSeconds = 60,
+        $SleepSeconds = 120,
 
         [Parameter(Mandatory)]
         [string]

@@ -52,7 +52,11 @@ function Export-XbTable {
 
         [ValidateRange(1,100)]
         [int]
-        $Parallel = 1
+        $Parallel = 1,
+
+        [ValidateRange(60,600)]
+        [int]
+        $SleepSeconds = 120
     )
 
     $receiveSplat = @{
@@ -91,7 +95,7 @@ function Export-XbTable {
             $Operation
         }
 
-        $Batches = Wait-XbAsyncArchive -ClusterUrl $ClusterUrl -DatabaseName $DatabaseName -Waiters $Batches
+        $Batches = Wait-XbAsyncArchive -ClusterUrl $ClusterUrl -DatabaseName $DatabaseName -Waiters $Batches -SleepSeconds $SleepSeconds
 
         $Batches | ForEach-Object {
             $_ | Receive-XbAsyncArchive @receiveSplat
