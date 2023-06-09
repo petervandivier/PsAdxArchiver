@@ -7,6 +7,10 @@ function Export-XbTable {
 .Parameter Parallel
     Specifies number of concurrent executions to allow. 
     Max 100. Defaults to 1 (one): *not* parallel.
+
+.Parameter NoExecute
+    Prints batch bounds to verbose stream but does not initiate archive command(s). 
+    For validation & testing.
 #>
     [CmdletBinding()]
     param (
@@ -18,7 +22,7 @@ function Export-XbTable {
         [string]
         $Container,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string]
         $LogFile,
 
@@ -56,8 +60,13 @@ function Export-XbTable {
 
         [ValidateRange(60,600)]
         [int]
-        $SleepSeconds = 120
+        $SleepSeconds = 120,
+
+        [switch]
+        $NoExecute
     )
+
+    $DoExecute = -Not $NoExecute
 
     $receiveSplat = @{
         StorageAccountName = $StorageAccountName
@@ -90,15 +99,19 @@ function Export-XbTable {
             $endStr   = $Bounds[$_].End
             $prefix   = $Bounds[$_].Label
             Write-Verbose "Initializing parallel batch; IndexPosition: '$_', Start: '$startStr', End: '$endStr'"
-            $Operation = Start-XbAsyncArchive -Start $startStr -End $endStr @AdxTableSpec
-            $Operation.Prefix = "${TimestampColumnName}=${prefix}"
-            $Operation
+            if($DoExecute){
+                $Operation = Start-XbAsyncArchive -Start $startStr -End $endStr @AdxTableSpec
+                $Operation.Prefix = "${TimestampColumnName}=${prefix}"
+                $Operation
+            }
         }
 
-        $Batches = Wait-XbAsyncArchive -ClusterUrl $ClusterUrl -DatabaseName $DatabaseName -Waiters $Batches -SleepSeconds $SleepSeconds
+        if($DoExecute){
+            $Batches = Wait-XbAsyncArchive -ClusterUrl $ClusterUrl -DatabaseName $DatabaseName -Waiters $Batches -SleepSeconds $SleepSeconds
 
-        $Batches | ForEach-Object {
-            $_ | Receive-XbAsyncArchive @receiveSplat
+            $Batches | ForEach-Object {
+                $_ | Receive-XbAsyncArchive @receiveSplat
+            }
         }
     }
 }
