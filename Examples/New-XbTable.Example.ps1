@@ -9,4 +9,4 @@ $newTableSplat = @{
     TimestampColumnName = 'StartTime'
 }
 
-New-XbTable @newTableSplat -ErrorAction SilentlyContinue
+New-XbTable @newTableSplat -NoDeploy -ErrorAction SilentlyContinue

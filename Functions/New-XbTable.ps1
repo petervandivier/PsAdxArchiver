@@ -6,6 +6,9 @@ function New-XbTable {
 
 .Link
     https://learn.microsoft.com/en-us/azure/data-explorer/kusto/management/external-tables-azurestorage-azuredatalake
+
+.Parameter NoDeploy
+    Only print the KQL `create external table...` command, do not execute the command.
 #>
     [CmdletBinding()]
     param (
@@ -35,7 +38,10 @@ function New-XbTable {
 
         [Parameter(Mandatory)]
         [string]
-        $TimestampColumnName
+        $TimestampColumnName,
+
+        [switch]
+        $NoDeploy
     )
 
     $Keys = Get-AzStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
@@ -77,6 +83,9 @@ function New-XbTable {
         ")"
     ) -join "`n"
 
-    # Invoke-AdxCmd @Connection -Command $TableDdl
-    $TableDdl 
+    if($NoDeploy){
+        $TableDdl 
+    } else {
+        Invoke-AdxCmd @Connection -Command $TableDdl
+    }
 }
