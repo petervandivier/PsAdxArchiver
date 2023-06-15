@@ -54,15 +54,15 @@ function Wait-XbAsyncArchive {
             }
 
             if($operation.State -eq 'InProgress'){
-                Write-Verbose "$(Get-Date -Format u): Awaiting $OperationName. Current wait time: $($operation.Duration)" 
+                Write-Verbose "$(Get-Date -Format o): Awaiting $OperationName. Current wait time: $($operation.Duration)" 
                 Start-Sleep -Seconds $SleepSeconds
                 continue
             }elseif($operation.State -eq 'Completed') {
-                Write-Host "$(Get-Date -Format u): Completed $OperationName." -ForegroundColor Green
+                Write-Host "$(Get-Date -Format o): Completed $OperationName." -ForegroundColor Green
                 New-BurntToastNotification -Text "Completed $OperationName"
                 break 
             }elseif($operation.State -eq 'Throttled') {
-                Write-Error "$(Get-Date -Format u): Throttled operation $OperationName" 
+                Write-Error "$(Get-Date -Format o): Throttled operation $OperationName" 
                 Start-Sleep -Seconds $SleepSeconds
                 break
             }else{
