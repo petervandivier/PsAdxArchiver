@@ -11,6 +11,11 @@ function Export-XbTable {
 .Parameter NoExecute
     Prints batch bounds to verbose stream but does not initiate archive command(s). 
     For validation & testing.
+
+.Parameter Inclusive
+    Adds an additional bound to the end of the timespan. Allows copy-paste from a
+    KQL `summarize count() by bin(Timestamp,_step)` without needing to manually 
+    increment to terminal bin by 1.
 #>
     [CmdletBinding()]
     param (
@@ -63,7 +68,10 @@ function Export-XbTable {
         $SleepSeconds = 120,
 
         [switch]
-        $NoExecute
+        $NoExecute,
+
+        [switch]
+        $Inclusive
     )
 
     $DoExecute = -Not $NoExecute
@@ -79,6 +87,10 @@ function Export-XbTable {
         DatabaseName = $DatabaseName
         TableName = $TableName
         TimestampColumnName = $TimestampColumnName
+    }
+
+    if($Inclusive){
+        $End = $End.Add($Step)
     }
 
     $Bounds = New-XbBatchBounds -Start $Start -End $End -Step $Step
