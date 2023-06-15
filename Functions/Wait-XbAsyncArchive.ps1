@@ -62,17 +62,9 @@ function Wait-XbAsyncArchive {
                 New-BurntToastNotification -Text "Completed $OperationName"
                 break 
             }elseif($operation.State -eq 'Throttled') {
-                Write-Warning "$(Get-Date -Format u): Throttled operation $OperationName" 
+                Write-Error "$(Get-Date -Format u): Throttled operation $OperationName" 
                 Start-Sleep -Seconds $SleepSeconds
-                # TODO: resubmit, needs Table & Column data from Start-Cmd AFAICT
-                # $NewArchiveCmd = @{
-                #     Start = $Waiter.Start
-                #     End = $Waiter.End
-                # }
-                # $NewWaiter = Start-XbAsyncArchive @NewArchiveCmd
-                # Write-Warning "$(Get-Date -Format u): Re-submitting operation for Start: '$($Waiter.Start)', End: '$($Waiter.End)'. Old OperationId: '$($Waiter.OperationId)', New OperationId: '$($NewWaiter.OperationId)'" 
-                # $Waiter.OperationId = $NewWaiter.OperationId
-                continue
+                break
             }else{
                 Write-Error "Unexpected state occured: '$($operation.State)' for $OperationName"
                 $operation | ConvertTo-Json -Depth 0 | Write-Error
