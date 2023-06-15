@@ -31,6 +31,7 @@
     FunctionsToExport = @(
         'Export-XbTable'
         'New-XbBatchBounds'
+        'New-XbTable'
         'Receive-XbAsyncArchive'
         'Start-XbAsyncArchive'
         'Wait-XbAsyncArchive'
