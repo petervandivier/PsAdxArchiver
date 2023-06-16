@@ -46,13 +46,13 @@ function Receive-XbAsyncArchive {
     foreach($blob in $Blobs) {
         $ResultBlob = $ResultBlobs | Where-Object Name -eq $blob.Name
         $Tags = @{
-            OperationId = $Waiter.OperationId
+            OperationId = $Waiter.OperationId.ToString()
             Start = $Waiter.Start.ToString('u')
             End = $Waiter.End.ToString('u')
-            RowCount = $ResultBlob.RowCount
-            SizeInBytes = $ResultBlob.SizeInBytes
+            RowCount = $ResultBlob.RowCount.ToString()
+            SizeInBytes = $ResultBlob.SizeInBytes.ToString()
         }
-        Set-AzStorageBlobTag -Tag $Tags -Container $Container -Blob $blob.Name -Context $Context
+        Set-AzStorageBlobTag -Tag $Tags -Container $Container -Blob $blob.Name -Context $Context | Out-Null
     }
 
     $Aggregate = $Blobs | ForEach-Object {$_.Length} | Measure-Object -Sum 
