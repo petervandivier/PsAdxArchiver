@@ -32,6 +32,7 @@ function Export-XbTable {
         $LogFile,
 
         [Parameter(Mandatory)]
+        [ValidateScript({$_.EndsWith(';Fed=True')})]
         [string]
         $ClusterUrl,
 
