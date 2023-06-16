@@ -27,17 +27,30 @@ function Receive-XbAsyncArchive {
 
     $Result = Invoke-AdxCmd @AdxConnection -Command $ReceiveWaiterKql
 
+    $ResultBlobs = $Result | ForEach-Object {
+        # alt method
+        # [System.Web.HttpUtility]::UrlDecode($_.Substring($_.IndexOf($Container)+$Container.Length+1))
+        [PsCustomObject]@{
+            Name = "$($Waiter.Prefix)/$($_.Path.Substring($_.Path.LastIndexOf('/')+1))"
+            RowCount = $_.NumRecords
+            SizeInBytes = $_.SizeInBytes
+        }
+    }
+
     $Context = New-AzStorageContext -StorageAccountName $StorageAccountName -UseConnectedAccount
 
     $Blobs = $Context | Get-AzStorageBlob -Container $Container | Where-Object { 
-        $_.Name -in $Result.Path
+        $_.Name -in $ResultBlobs.Name
     }
 
     foreach($blob in $Blobs) {
+        $ResultBlob = $ResultBlobs | Where-Object Name -eq $blob.Name
         $Tags = @{
             OperationId = $Waiter.OperationId
             Start = $Waiter.Start.ToString('u')
             End = $Waiter.End.ToString('u')
+            RowCount = $ResultBlob.RowCount
+            SizeInBytes = $ResultBlob.SizeInBytes
         }
         Set-AzStorageBlobTag -Tag $Tags -Container $Container -Blob $blob.Name -Context $Context
     }
