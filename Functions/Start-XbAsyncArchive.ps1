@@ -59,8 +59,12 @@ function Start-XbAsyncArchive {
     Write-Verbose "$(Get-Date -Format o): Started Operation: '$($command.OperationId)', Start: '$StartStr', End: '$EndStr'"
 
     [XbAsyncExportWaiter][PsCustomObject]@{
-        OperationId = $command.OperationId
-        Start = [DateTimeOffset]$StartStr
-        End = [DateTimeOffset]$EndStr
+        Start               = [DateTimeOffset]$StartStr
+        End                 = [DateTimeOffset]$EndStr
+        ClusterUrl          = $ClusterUrl
+        DatabaseName        = $DatabaseName
+        TableName           = $TableName
+        TimestampColumnName = $TimestampColumnName 
+        OperationId         = $command.OperationId
     }
 }

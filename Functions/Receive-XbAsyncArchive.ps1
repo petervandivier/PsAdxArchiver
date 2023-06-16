@@ -18,10 +18,28 @@ function Receive-XbAsyncArchive {
         $LogFile
     )
 
+    $AdxConnection = @{
+        ClusterUrl = $Waiter.ClusterUrl
+        DatabaseName = $Waiter.DatabaseName
+    }
+
+    $ReceiveWaiterKql = ".show operation $($Waiter.OperationId) details"
+
+    $Result = Invoke-AdxCmd @AdxConnection -Command $ReceiveWaiterKql
+
     $Context = New-AzStorageContext -StorageAccountName $StorageAccountName -UseConnectedAccount
 
     $Blobs = $Context | Get-AzStorageBlob -Container $Container | Where-Object { 
-        $_.Name.StartsWith($Waiter.Prefix)
+        $_.Name -in $Result.Path
+    }
+
+    foreach($blob in $Blobs) {
+        $Tags = @{
+            OperationId = $Waiter.OperationId
+            Start = $Waiter.Start.ToString('u')
+            End = $Waiter.End.ToString('u')
+        }
+        Set-AzStorageBlobTag -Tag $Tags -Container $Container -Blob $blob.Name -Context $Context
     }
 
     $Aggregate = $Blobs | ForEach-Object {$_.Length} | Measure-Object -Sum 
@@ -36,4 +54,3 @@ function Receive-XbAsyncArchive {
 
     $Waiter
 }
-

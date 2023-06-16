@@ -119,7 +119,7 @@ function Export-XbTable {
         }
 
         if($DoExecute){
-            $Batches = Wait-XbAsyncArchive -ClusterUrl $ClusterUrl -DatabaseName $DatabaseName -Waiters $Batches -SleepSeconds $SleepSeconds
+            $Batches = Wait-XbAsyncArchive -Waiters $Batches -SleepSeconds $SleepSeconds
 
             $Batches | ForEach-Object {
                 $_ | Receive-XbAsyncArchive @receiveSplat

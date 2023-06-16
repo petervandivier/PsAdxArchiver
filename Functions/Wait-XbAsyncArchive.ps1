@@ -13,29 +13,20 @@ function Wait-XbAsyncArchive {
 
         [ValidateRange(60,600)]
         [int]
-        $SleepSeconds = 120,
-
-        [Parameter(Mandatory)]
-        [string]
-        $ClusterUrl,
-
-        [Parameter(Mandatory)]
-        [string]
-        $DatabaseName
+        $SleepSeconds = 120
     )
 
     $Waiters | ForEach-Object -Parallel {
         $VerbosePreference = $using:VerbosePreference
-        $ClusterUrl = $using:ClusterUrl
-        $DatabaseName = $using:DatabaseName
         $SleepSeconds = $using:SleepSeconds
 
+        $Waiter = $_
+
         $AdxConnection = @{
-            ClusterUrl = $ClusterUrl
-            DatabaseName = $DatabaseName
+            ClusterUrl = $Waiter.ClusterUrl
+            DatabaseName = $Waiter.DatabaseName
         }
 
-        $Waiter = $_
         $OperationName = "Operation: '$($Waiter.OperationId)'"
         if($Waiter.Start){
             $OperationName += ", Start: '$($Waiter.Start)'"
