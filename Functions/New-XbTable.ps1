@@ -25,6 +25,7 @@ function New-XbTable {
         $Container,
 
         [Parameter(Mandatory)]
+        [ValidateScript({$_.EndsWith(';Fed=True')})]
         [string]
         $ClusterUrl,
 

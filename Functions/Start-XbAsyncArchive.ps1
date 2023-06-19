@@ -1,22 +1,36 @@
 
 function Start-XbAsyncArchive {
 <#
-.SYNOPSIS
+.Synopsis
     Executes the .`export Async` command for an input table & returns the operation id
-.OUTPUTS 
+
+.Outputs 
     [guid]$OperationId
+
+.Parameter StartStr
+    Inclusive lower bound of the export batch.
+    Deliberately a string to bypass client localization issues. 
+    Enforced to be a valid datetime.
+
+.Parameter EndStr
+    Exclusive upper bound of the export batch.
+    Deliberately a string to bypass client localization issues. 
+    Enforced to be a valid datetime.
 #>
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
+        [ValidateScript({Get-Date $_})]
         [string]
         $StartStr,
 
         [Parameter(Mandatory)]
+        [ValidateScript({Get-Date $_})]
         [string]
         $EndStr,
 
         [Parameter(Mandatory)]
+        [ValidateScript({$_.EndsWith(';Fed=True')})]
         [string]
         $ClusterUrl,
 
@@ -56,11 +70,15 @@ function Start-XbAsyncArchive {
         Write-Warning "Returned OperationId: '$($command.OperationId)' is not a GUID. "
     }
 
-    Write-Verbose "$(Get-Date -Format u): Started Operation: '$($command.OperationId)', Start: '$StartStr', End: '$EndStr'"
+    Write-Verbose "$(Get-Date -Format o): Started Operation: '$($command.OperationId)', Start: '$StartStr', End: '$EndStr'"
 
     [XbAsyncExportWaiter][PsCustomObject]@{
-        OperationId = $command.OperationId
-        Start = [DateTimeOffset]$StartStr
-        End = [DateTimeOffset]$EndStr
+        Start               = [DateTimeOffset]$StartStr
+        End                 = [DateTimeOffset]$EndStr
+        ClusterUrl          = $ClusterUrl
+        DatabaseName        = $DatabaseName
+        TableName           = $TableName
+        TimestampColumnName = $TimestampColumnName 
+        OperationId         = $command.OperationId
     }
 }

@@ -13,29 +13,20 @@ function Wait-XbAsyncArchive {
 
         [ValidateRange(60,600)]
         [int]
-        $SleepSeconds = 120,
-
-        [Parameter(Mandatory)]
-        [string]
-        $ClusterUrl,
-
-        [Parameter(Mandatory)]
-        [string]
-        $DatabaseName
+        $SleepSeconds = 120
     )
 
     $Waiters | ForEach-Object -Parallel {
         $VerbosePreference = $using:VerbosePreference
-        $ClusterUrl = $using:ClusterUrl
-        $DatabaseName = $using:DatabaseName
         $SleepSeconds = $using:SleepSeconds
 
+        $Waiter = $_
+
         $AdxConnection = @{
-            ClusterUrl = $ClusterUrl
-            DatabaseName = $DatabaseName
+            ClusterUrl = $Waiter.ClusterUrl
+            DatabaseName = $Waiter.DatabaseName
         }
 
-        $Waiter = $_
         $OperationName = "Operation: '$($Waiter.OperationId)'"
         if($Waiter.Start){
             $OperationName += ", Start: '$($Waiter.Start)'"
@@ -54,25 +45,17 @@ function Wait-XbAsyncArchive {
             }
 
             if($operation.State -eq 'InProgress'){
-                Write-Verbose "$(Get-Date -Format u): Awaiting $OperationName. Current wait time: $($operation.Duration)" 
+                Write-Verbose "$(Get-Date -Format o): Awaiting $OperationName. Current wait time: $($operation.Duration)" 
                 Start-Sleep -Seconds $SleepSeconds
                 continue
             }elseif($operation.State -eq 'Completed') {
-                Write-Host "$(Get-Date -Format u): Completed $OperationName." -ForegroundColor Green
+                Write-Host "$(Get-Date -Format o): Completed $OperationName." -ForegroundColor Green
                 New-BurntToastNotification -Text "Completed $OperationName"
                 break 
             }elseif($operation.State -eq 'Throttled') {
-                Write-Warning "$(Get-Date -Format u): Throttled operation $OperationName" 
+                Write-Error "$(Get-Date -Format o): Throttled operation $OperationName" 
                 Start-Sleep -Seconds $SleepSeconds
-                # TODO: resubmit, needs Table & Column data from Start-Cmd AFAICT
-                # $NewArchiveCmd = @{
-                #     Start = $Waiter.Start
-                #     End = $Waiter.End
-                # }
-                # $NewWaiter = Start-XbAsyncArchive @NewArchiveCmd
-                # Write-Warning "$(Get-Date -Format u): Re-submitting operation for Start: '$($Waiter.Start)', End: '$($Waiter.End)'. Old OperationId: '$($Waiter.OperationId)', New OperationId: '$($NewWaiter.OperationId)'" 
-                # $Waiter.OperationId = $NewWaiter.OperationId
-                continue
+                break
             }else{
                 Write-Error "Unexpected state occured: '$($operation.State)' for $OperationName"
                 $operation | ConvertTo-Json -Depth 0 | Write-Error
