@@ -27,6 +27,10 @@ function Receive-XbAsyncArchive {
 
     $Result = Invoke-AdxCmd @AdxConnection -Command $ReceiveWaiterKql
 
+    if($LogFile){
+        $Result | Export-Csv "$LogFile-blobs.csv" -Append
+    }
+
     $ResultBlobs = $Result | ForEach-Object {
         # alt method
         # [System.Web.HttpUtility]::UrlDecode($_.Substring($_.IndexOf($Container)+$Container.Length+1))
