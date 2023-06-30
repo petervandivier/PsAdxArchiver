@@ -1,3 +1,4 @@
+#Requires -Modules @{ModuleName='Pester';MaximumVersion='4.99';Guid='a699dea5-2c73-4616-a270-1f7abb777e71'}
 
 $caseName = "New-XbTable.1"
 $case1 = Get-Content "$PsScriptRoot/Configuration/${caseName}.json" | ConvertFrom-Json -AsHashtable
