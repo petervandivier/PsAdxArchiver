@@ -1,0 +1,10 @@
+{
+    "StorageAccountName":  "mystorageaccount",
+    "Container":           "storm-events",
+    "LogFile":             null,
+    "ClusterUrl":          "https://help.kusto.windows.net;Fed=True",
+    "DatabaseName":        "Samples",
+    "TableName":           "StormEvents",
+    "TimestampColumnName": "StartTime",
+    "Parallel":            8
+}
