@@ -13,9 +13,13 @@
     tags if the `Receive` step was skipped or cancelled)
 #>
 
-$Context = New-AzStorageContext -StorageAccountName mystorageaccount -UseConnectedAccount
+$StorageAccountName = 'mystorageaccount'
+$Container = 'storm-events'
+$TimestampColumnName = 'StartTime'
 
-$Blobs = $Context | Get-AzStorageBlob -Container storm-events -Prefix "start=2007-06-01"
+$Context = New-AzStorageContext -StorageAccountName $StorageAccountName -UseConnectedAccount
+
+$Blobs = $Context | Get-AzStorageBlob -Container $Container -Prefix "$TimestampColumnName=2007-06-01"
 
 $tags = $Blobs | ForEach-Object { 
     $blob = $_
