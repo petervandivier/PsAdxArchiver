@@ -41,6 +41,7 @@ function New-XbTable {
         [string]
         $TimestampColumnName,
 
+        [Alias('TextOnly','DdlOnly','AsText')]
         [switch]
         $NoDeploy
     )
@@ -71,7 +72,7 @@ function New-XbTable {
     $TableDdl += @(
         ""
         "kind = blob "
-        "partitionby (${TimestampColumnName}:datetime = startofday($TimestampColumnName))"
+        "partition by (${TimestampColumnName}:datetime = startofday($TimestampColumnName))"
         "pathformat = (`"$TimestampColumnName=`" datetime_pattern(`"yyyyMMdd`", $TimestampColumnName))"
         "dataformat = parquet "
         "("
