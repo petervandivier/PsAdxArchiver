@@ -76,7 +76,7 @@ function New-XbTable {
         ""
         "kind = blob "
         "partition by (${TimestampColumnName}:datetime = startofday($TimestampColumnName))"
-        "pathformat = (`"$TimestampColumnName=`" datetime_pattern(`"yyyyMMdd`", $TimestampColumnName))"
+        "pathformat = (`"$TimestampColumnName=`" datetime_pattern(`"yyyy-MM-dd`", $TimestampColumnName))"
         "dataformat = parquet "
         "("
         "    h@'https://${StorageAccountName}.blob.core.windows.net/${Container}/;${AccessKey}' " 
