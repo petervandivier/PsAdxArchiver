@@ -46,6 +46,9 @@ function New-XbTable {
         $NoDeploy
     )
 
+    # if StorageAccount not exists
+    # if Container not exists
+
     $Keys = Get-AzStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
     # TODO: ¿is it possible to `catch [Microsoft.Rest.Azure.CloudException], [Microsoft.Azure.Commands.Management.Storage.GetAzureStorageAccountKeyCommand]`?
     if($Keys){
