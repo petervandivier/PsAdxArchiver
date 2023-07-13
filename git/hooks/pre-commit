@@ -1,0 +1,14 @@
+#!/bin/sh
+# 
+# Win `pwsh -File` requires an extension
+# Git Hooks require **no** extension
+# This is the workaround
+# - https://github.com/PowerShell/PowerShell/issues/16480
+# 
+# run `git config --local core.hooksPath git/hooks` to 
+# configure this repo on this client to accept the hooks
+# from this directory
+# 
+
+wd="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+pwsh -NoProfile -File "${wd}/Pester.ps1"
