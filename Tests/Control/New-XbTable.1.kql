@@ -23,7 +23,7 @@
     StormSummary: dynamic
 ) 
 kind = blob 
-partitionby (StartTime:datetime = startofday(StartTime))
+partition by (StartTime:datetime = startofday(StartTime))
 pathformat = ("StartTime=" datetime_pattern("yyyyMMdd", StartTime))
 dataformat = parquet 
 (
