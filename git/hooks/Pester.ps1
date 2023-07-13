@@ -12,4 +12,9 @@ Import-Module $PsScriptRoot/../../PsAdxArchiver.psd1 -Force
 Remove-Module Pester -ErrorAction SilentlyContinue
 Import-Module Pester -MaximumVersion '4.99'
 
-Invoke-Pester $PsScriptRoot/../../Tests
+$PesterResult = Invoke-Pester $PsScriptRoot/../../Tests -PassThru
+
+if($PesterResult.FailedCount -gt 0){
+    Write-Error "A pre-commit condition failed. The commit will abort. Check Pester output."
+    exit 1
+}
