@@ -13,26 +13,12 @@ function Wait-XbAsyncArchive {
 
         [ValidateRange(60,600)]
         [int]
-        $SleepSeconds = 120,
-
-        [string]
-        $LogFile,
-
-        [Parameter(Mandatory)]
-        [string]
-        $StorageAccountName,
-
-        [Parameter(Mandatory)]
-        [string]
-        $Container
+        $SleepSeconds = 120
     )
 
     $Waiters | ForEach-Object -Parallel {
         $VerbosePreference = $using:VerbosePreference
         $SleepSeconds = $using:SleepSeconds
-        $LogFile = $using:LogFile
-        $StorageAccountName = $using:StorageAccountName
-        $Container = $using:Container
 
         $Waiter = $_
 
@@ -64,11 +50,6 @@ function Wait-XbAsyncArchive {
                 continue
             }elseif($operation.State -eq 'Completed') {
                 Write-Host "$(Get-Date -Format o): Completed $OperationName." -ForegroundColor Green
-                Receive-XbAsyncArchive `
-                    -Waiter $Waiter `
-                    -StorageAccountName $StorageAccountName `
-                    -Container $Container `
-                    -LogFile $LogFile
                 break 
             }elseif($operation.State -eq 'Throttled') {
                 Write-Error "$(Get-Date -Format o): Throttled operation $OperationName" 
