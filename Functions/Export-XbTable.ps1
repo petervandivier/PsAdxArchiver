@@ -98,12 +98,6 @@ function Export-XbTable {
 
     $DoExecute = -Not $NoExecute
 
-    $receiveSplat = @{
-        StorageAccountName = $StorageAccountName
-        Container = $Container
-        LogFile = $LogFile
-    }
-
     $AdxTableSpec = @{
         ClusterUrl = $ClusterUrl
         DatabaseName = $DatabaseName
@@ -120,6 +114,17 @@ function Export-XbTable {
         }
         'BatchBounds' {
             $BatchBounds
+        }
+    }
+
+    # Get fully qualified path to LogFile (if we're logging)
+    # so that we don't need to worry about parallel scoping issues
+    # in the waitfor/receive flow
+    if($PsBoundParameters.Keys -contains 'LogFile'){
+        if(Test-Path $LogFile){
+            $LogFile = Resolve-Path $LogFile
+        } else {
+            $LogFile = New-Item -Path $LogFile -ItemType File
         }
     }
 
@@ -148,11 +153,12 @@ function Export-XbTable {
         }
 
         if($DoExecute){
-            $Batches = Wait-XbAsyncArchive -Waiters $Batches -SleepSeconds $SleepSeconds
-
-            $Batches | ForEach-Object {
-                $_ | Receive-XbAsyncArchive @receiveSplat
-            }
+            $Batches = Wait-XbAsyncArchive `
+                -Waiters $Batches `
+                -SleepSeconds $SleepSeconds `
+                -LogFile $LogFile `
+                -StorageAccountName $StorageAccountName `
+                -Container $Container
         }
         New-BurntToastNotification -Text "Completed '$Parallel' batches for '$($Bounds[$IndexStart].Start)' to '$($Bounds[$IndexEnd].End)'."
     }
