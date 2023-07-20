@@ -153,7 +153,9 @@ function Export-XbTable {
             $Batches | ForEach-Object {
                 $_ | Receive-XbAsyncArchive @receiveSplat
             }
+            $Status = "Completed '$Parallel' batches for '$($Bounds[$IndexStart].Start)' to '$($Bounds[$IndexEnd].End)'."
+
+            New-BurntToastNotification -Text $Status
         }
-        New-BurntToastNotification -Text "Completed '$Parallel' batches for '$($Bounds[$IndexStart].Start)' to '$($Bounds[$IndexEnd].End)'."
     }
 }
