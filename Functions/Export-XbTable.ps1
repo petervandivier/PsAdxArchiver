@@ -130,6 +130,9 @@ function Export-XbTable {
     $BatchCount = $Bounds.Count
 
     for($IndexStart = 0; $IndexStart -lt $BatchCount; $IndexStart += $Parallel) {
+        $StopWatch = New-Object System.Diagnostics.Stopwatch
+        $StopWatch.Start()
+
         $IndexEnd = $IndexStart + $Parallel - 1
         if($IndexEnd -ge $BatchCount){
             $IndexEnd = $BatchCount - 1
@@ -150,12 +153,45 @@ function Export-XbTable {
         if($DoExecute){
             $Batches = Wait-XbAsyncArchive -Waiters $Batches -SleepSeconds $SleepSeconds
 
+            $StopWatch.Stop()
+            $WaitDurationMin = $StopWatch.Elapsed.TotalMinutes
+            $WaitDurationStr = $StopWatch.Elapsed.ToString()
+            $StopWatch.Restart()
+
             $Batches | ForEach-Object {
                 $_ | Receive-XbAsyncArchive @receiveSplat
             }
-            $Status = "Completed '$Parallel' batches for '$($Bounds[$IndexStart].Start)' to '$($Bounds[$IndexEnd].End)'."
+
+            $StopWatch.Stop()
+            $ReceiveDurationMin = $StopWatch.Elapsed.TotalMinutes
+            $ReceiveDurationStr = $StopWatch.Elapsed.ToString()
+
+            $TotalMinutes = $WaitDurationMin + $ReceiveDurationMin
+            $TotalMinutesStr = [TimeSpan]::FromMinutes($TotalMinutes).ToString()
+
+            $ExportedMb = ($Batches.SizeBytes | Measure-Object -Sum).Sum / 1mb
+            $BlobCount = ($Batches.NumFiles | Measure-Object -Sum).Sum
+
+            $WaitSerialMbPerSec = $ExportedMb / ($WaitDurationMin * 60)
+            $TotalSerialMbPerSec = $ExportedMb / ($TotalMinutes * 60)
+            $AverageMbPerSec = ($Batches | ForEach-Object {
+                ($_.SizeBytes / 1mb) / $_.Duration.TotalSeconds
+            } | Measure-Object -Average).Average
+
+            $Status = @(
+                "Completed '$Parallel' batches for '$($Bounds[$IndexStart].Start)' to '$($Bounds[$IndexEnd].End)'. "
+                "- Exported Mb: '$ExportedMb'. "
+                "- Count blobs: '$BlobCount'. "
+                "- Serial export duration: '$WaitDurationStr'. "
+                "  - Average speed (per-thread): '$AverageMbPerSec' Mb/sec. "
+                "  - Overall speed (export only): '$WaitSerialMbPerSec' Mb/sec. "
+                "- Blob tagging duration: '$ReceiveDurationStr'. " 
+                "- Total runtime: '$TotalMinutesStr'. "
+                "  - Overall speed (including tagging): '$TotalSerialMbPerSec' Mb/sec. "
+            ) -join "`n"
 
             New-BurntToastNotification -Text $Status
+            Write-Host $Status -ForegroundColor Green
         }
     }
 }
