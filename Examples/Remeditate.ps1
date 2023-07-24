@@ -31,13 +31,14 @@ $tags = $Blobs | ForEach-Object {
     }
 }
 
+# Sometimes you just nuke the whole day and re-run
+# even if not, untagged blobs are pretty useless for debugging
+# fastest fix is to nuke all untagged blobs and fill in the gaps
+$Blobs | Where-Object TagCount -eq 0 | Remove-AzStorageBlob
+
+# inventory what you actually _do_ have tagged and recheck counts
 $tags | ForEach-Object {
     $_.Start + " - " + $_.End
 } | Group-Object | Sort-Object name | Select-Object count,name
-
-# if the offending batch(es) is (are) not found above, you may be able to
-# remove all blobs where `.TagCount -eq 0`
-
-$Blobs | Where-Object TagCount -eq 0 | Remove-AzStorageBlob
 
 # Re-run the export for the batch(es) you just nuked then re-run validation
