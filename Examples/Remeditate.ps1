@@ -31,7 +31,9 @@ $tags = $Blobs | ForEach-Object {
     }
 }
 
-$tags.Start | Group-Object | Sort-Object name | Select-Object count,name
+$tags | ForEach-Object {
+    $_.Start + " - " + $_.End
+} | Group-Object | Sort-Object name | Select-Object count,name
 
 # if the offending batch(es) is (are) not found above, you may be able to
 # remove all blobs where `.TagCount -eq 0`
