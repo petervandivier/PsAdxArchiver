@@ -175,7 +175,12 @@ function Export-XbTable {
             $WaitSerialMbPerSec = $ExportedMb / ($WaitDurationMin * 60)
             $TotalSerialMbPerSec = $ExportedMb / ($TotalMinutes * 60)
             $AverageMbPerSec = ($Batches | ForEach-Object {
-                ($_.SizeBytes / 1mb) / $_.Duration.TotalSeconds
+                $DurationSeconds = $_.Duration.TotalSeconds
+                if($DurationSeconds -eq 0){
+                    $null
+                } else {
+                    ($_.SizeBytes / 1mb) / $DurationSeconds
+                }
             } | Measure-Object -Average).Average
 
             $Status = @(
