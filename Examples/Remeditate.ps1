@@ -23,13 +23,11 @@ $Blobs = $Context | Get-AzStorageBlob -Container $Container -Prefix "$TimestampC
 
 $tags = $Blobs | ForEach-Object { 
     $blob = $_
-    $passThruAttribs = @(
-        @{l='context';e={$blob.Context}}
-        @{l='name';   e={$blob.Name}}
-    )
-    $obj = $blob | Get-AzStorageBlobTag 
+    $Context = $blob.Context
+    $Name = $blob.Name
+    $obj = $blob | Get-AzStorageBlobTag -ErrorAction SilentlyContinue
     if($obj.Count -gt 0){
-        $obj | Select-Object *,$passThruAttribs
+        $obj | Select-Object *,@{l='context';e={$Context}},@{l='name';e={$Name}}
     }
 }
 
