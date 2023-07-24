@@ -27,7 +27,10 @@ $tags = $Blobs | ForEach-Object {
         @{l='context';e={$blob.Context}}
         @{l='name';   e={$blob.Name}}
     )
-    $blob | Get-AzStorageBlobTag | Select-Object *,$passThruAttribs
+    $obj = $blob | Get-AzStorageBlobTag 
+    if($obj.Count -gt 0){
+        $obj | Select-Object *,$passThruAttribs
+    }
 }
 
 $tags.Start | Group-Object | Sort-Object name | Select-Object count,name
