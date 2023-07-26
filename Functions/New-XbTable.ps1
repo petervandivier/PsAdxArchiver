@@ -57,6 +57,7 @@ function New-XbTable {
 
     if([string]::IsNullOrEmpty($AccessKey)){
         Write-Error "AccessKey could not be retrived for Storage Account '$StorageAccountName' in Resource Group '$ResourceGroupName'. Do you need to activate PIM?"
+        $AccessKey = '******'
     }
 
     $Connection = @{

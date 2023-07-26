@@ -27,7 +27,7 @@ partition by (StartTime:datetime = startofday(StartTime))
 pathformat = ("StartTime=" datetime_pattern("yyyy-MM-dd", StartTime))
 dataformat = parquet 
 (
-    h@'https://mystorageaccount.blob.core.windows.net/storm-events/;' 
+    h@'https://mystorageaccount.blob.core.windows.net/storm-events/;******' 
 ) 
 with ( 
     compressed = true,
