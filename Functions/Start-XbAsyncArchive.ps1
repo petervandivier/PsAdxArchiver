@@ -76,6 +76,14 @@ function Start-XbAsyncArchive {
         "| where $TimestampColumnName <  $HighBound"
     ) -join "`n"
 
+    if($null -Ne 'UnixTime'){
+        $exportAsyncCmd += "`n"
+        $exportAsyncCmd += @(
+            "| extend ${TimestampColumnName}_DT = unixtime_${UnixTime}s_todatetime(${TimestampColumnName})"
+            "| project-reorder ${TimestampColumnName}_DT"
+        ) -join "`n"
+    }
+
     if($NoExecute){
         Write-Host $exportAsyncCmd
         return

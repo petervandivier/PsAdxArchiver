@@ -41,6 +41,11 @@ function New-XbTable {
         [string]
         $TimestampColumnName,
 
+        [ValidateSet('second','millisecond')]
+        [AllowNull()]
+        [string]
+        $UnixTime,
+
         [Alias('TextOnly','DdlOnly','AsText')]
         [switch]
         $NoDeploy
@@ -73,11 +78,20 @@ function New-XbTable {
 
     $TableDdl = ConvertTo-AdxCreateTableCmd $TableSchema
     $TableDdl = $TableDdl.Replace('.create-merge table','.create external table')
+    if($null -Eq $UnixTime){
+        $PartitionBy = "partition by (${TimestampColumnName}:datetime = startofday($TimestampColumnName))"
+        $PathFormat = "pathformat = (`"$TimestampColumnName=`" datetime_pattern(`"yyyy-MM-dd`", $TimestampColumnName))"
+    } else {
+        $TableDdl = $TableDdl.Replace("table ext${TableName} (","table ext${TableName} (`n    ${TimestampColumnName}_DT: datetime,")
+        $PartitionBy = "partition by (${TimestampColumnName}_DT:datetime = startofday(${TimestampColumnName}_DT))"
+        $PathFormat = "pathformat = (`"${TimestampColumnName}_DT=`" datetime_pattern(`"yyyy-MM-dd`", ${TimestampColumnName}_DT))"
+    }
+
     $TableDdl += @(
         ""
         "kind = blob "
-        "partition by (${TimestampColumnName}:datetime = startofday($TimestampColumnName))"
-        "pathformat = (`"$TimestampColumnName=`" datetime_pattern(`"yyyy-MM-dd`", $TimestampColumnName))"
+        "$PartitionBy"
+        "$PathFormat"
         "dataformat = parquet "
         "("
         "    h@'https://${StorageAccountName}.blob.core.windows.net/${Container}/;${AccessKey}' " 
