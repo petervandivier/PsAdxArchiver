@@ -92,6 +92,10 @@ function Export-XbTable {
         [int]
         $SleepSeconds = 120,
 
+        [ValidateSet('second','millisecond')]
+        [string]
+        $UnixTime,
+
         [switch]
         $NoExecute
     )
@@ -144,9 +148,11 @@ function Export-XbTable {
             $prefix   = $Bounds[$_].Label
             Write-Verbose "Initializing parallel batch; IndexPosition: '$_', Start: '$startStr', End: '$endStr'"
             if($DoExecute){
-                $Operation = Start-XbAsyncArchive -Start $startStr -End $endStr @AdxTableSpec
+                $Operation = Start-XbAsyncArchive -Start $startStr -End $endStr -UnixTime $UnixTime @AdxTableSpec
                 $Operation.Prefix = "${TimestampColumnName}=${prefix}"
                 $Operation
+            } else {
+                Start-XbAsyncArchive -Start $startStr -End $endStr -UnixTime $UnixTime @AdxTableSpec -NoExecute
             }
         }
 
