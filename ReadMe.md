@@ -12,7 +12,9 @@ Because this module is designed to be long-running and bound to a laptop session
 
 ## But why?
 
-Anecdotally, [`.export async`](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/management/data-export/export-data-to-storage) only gives about 5 mb/sec throughput per thread. It can be parallelized but you need to manage it. That's what this module is for.
+Anecdotally, [`.export async`](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/management/data-export/export-data-to-storage) only gives about 5 mb/sec throughput per thread. Additionally, there is a [60-minute hard limit timeout](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/concepts/querylimits#limit-execution-timeout) after which any `.export` command will be terminated by the cluster.
+
+You need to batch & parallelize your `.export` commands to maximize throughput and minimize errors. This module provides functions and helper scripts for that.
 
 ## What's with the `Xb` prefix?
 
