@@ -92,6 +92,11 @@ function Export-XbTable {
         [int]
         $SleepSeconds = 120,
 
+        [ValidateSet('second','millisecond')]
+        [AllowNull()]
+        [string]
+        $UnixTime,
+
         [switch]
         $NoExecute
     )
@@ -144,9 +149,11 @@ function Export-XbTable {
             $prefix   = $Bounds[$_].Label
             Write-Verbose "Initializing parallel batch; IndexPosition: '$_', Start: '$startStr', End: '$endStr'"
             if($DoExecute){
-                $Operation = Start-XbAsyncArchive -Start $startStr -End $endStr @AdxTableSpec
+                $Operation = Start-XbAsyncArchive -Start $startStr -End $endStr -UnixTime $UnixTime @AdxTableSpec
                 $Operation.Prefix = "${TimestampColumnName}=${prefix}"
                 $Operation
+            } else {
+                Start-XbAsyncArchive -Start $startStr -End $endStr -UnixTime $UnixTime @AdxTableSpec -NoExecute
             }
         }
 
@@ -176,15 +183,15 @@ function Export-XbTable {
             $TotalSerialMbPerSec = $ExportedMb / ($TotalMinutes * 60)
             $AverageMbPerSec = ($Batches | ForEach-Object {
                 $DurationSeconds = $_.Duration.TotalSeconds
-                if($DurationSeconds -eq 0){
-                    $null
+                if($DurationSeconds -gt 0){
+                    $_.SizeBytes / (1mb * $DurationSeconds)
                 } else {
-                    ($_.SizeBytes / 1mb) / $DurationSeconds
+                    $null
                 }
             } | Measure-Object -Average).Average
 
             $Status = @(
-                "Completed '$Parallel' batches for '$($Bounds[$IndexStart].Start)' to '$($Bounds[$IndexEnd].End)'. "
+                "Completed '$($Batches.Count)' batches for '$($Bounds[$IndexStart].Start)' to '$($Bounds[$IndexEnd].End)'. "
                 "- Exported Mb: '$ExportedMb'. "
                 "- Count blobs: '$BlobCount'. "
                 "- Serial export duration: '$WaitDurationStr'. "

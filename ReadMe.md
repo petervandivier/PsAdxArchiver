@@ -4,6 +4,8 @@ Wrapper scripts to simplify export of a large table to azure blob storage.
 
 Assumes external table has already been provisioned.
 
+Requires that the table to be exported has some sort of timestamp column, either datetime or numeric unix time. 
+
 ## Stay Awake
 
 Because this module is designed to be long-running and bound to a laptop session, leveraging [PowerToys Awake](https://learn.microsoft.com/en-us/windows/powertoys/awake) is recommended.

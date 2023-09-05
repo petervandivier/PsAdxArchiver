@@ -44,15 +44,50 @@ function Start-XbAsyncArchive {
 
         [Parameter(Mandatory)]
         [string]
-        $TimestampColumnName
+        $TimestampColumnName,
+
+        [ValidateSet('second','millisecond')]
+        [AllowNull()]
+        [string]
+        $UnixTime,
+
+        [switch]
+        $NoExecute
     )
+
+    $UnixTime = $UnixTime.ToLower()
+    $EpochOffset = switch ($UnixTime) {
+        'Second'      { 62135596800 }
+        'Millisecond' { 62135596800000 }
+    }
+
+    if($null -Ne 'UnixTime'){
+        $LowBound = "tolong((datetime($startStr)/timespan(1 $UnixTime))-$EpochOffset)"
+        $HighBound = "tolong((datetime($endStr)/timespan(1 $UnixTime))-$EpochOffset)"
+    } else {
+        $LowBound = "datetime($startStr)"
+        $HighBound = "datetime($endStr)"
+    }
 
     $exportAsyncCmd = @(
         ".export async to table ext$TableName <|"
         "$TableName"
-        "| where $TimestampColumnName >= datetime($startStr)"
-        "| where $TimestampColumnName <  datetime($endStr)"
+        "| where $TimestampColumnName >= $LowBound"
+        "| where $TimestampColumnName <  $HighBound"
     ) -join "`n"
+
+    if($null -Ne 'UnixTime'){
+        $exportAsyncCmd += "`n"
+        $exportAsyncCmd += @(
+            "| extend ${TimestampColumnName}_DT = unixtime_${UnixTime}s_todatetime(${TimestampColumnName})"
+            "| project-reorder ${TimestampColumnName}_DT"
+        ) -join "`n"
+    }
+
+    if($NoExecute){
+        Write-Host $exportAsyncCmd
+        return
+    }
 
     $AdxConnection = @{
         ClusterUrl = $ClusterUrl
