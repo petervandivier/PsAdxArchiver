@@ -78,7 +78,7 @@ function New-XbTable {
 
     $TableDdl = ConvertTo-AdxCreateTableCmd $TableSchema
     $TableDdl = $TableDdl.Replace('.create-merge table','.create external table')
-    if($null -Eq $UnixTime){
+    if([string]::IsNullOrEmpty($UnixTime)){
         $PartitionBy = "partition by (${TimestampColumnName}:datetime = startofday($TimestampColumnName))"
         $PathFormat = "pathformat = (`"$TimestampColumnName=`" datetime_pattern(`"yyyy-MM-dd`", $TimestampColumnName))"
     } else {
