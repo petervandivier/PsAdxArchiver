@@ -24,6 +24,10 @@ function New-XbTable {
         [string]
         $Container,
 
+        [Parameter()]
+        [string]
+        $Prefix,
+
         [Parameter(Mandatory)]
         [ValidateScript({$_.EndsWith(';Fed=True')})]
         [string]
@@ -87,6 +91,12 @@ function New-XbTable {
         $PathFormat = "pathformat = (`"${TimestampColumnName}_DT=`" datetime_pattern(`"yyyy-MM-dd`", ${TimestampColumnName}_DT))"
     }
 
+    if([string]::IsNullOrEmpty($Prefix)){
+        $UriPath = $Container
+    } else {
+        $UriPath = "$Container/$Prefix"
+    }
+
     $TableDdl += @(
         ""
         "kind = blob "
@@ -94,7 +104,7 @@ function New-XbTable {
         "$PathFormat"
         "dataformat = parquet "
         "("
-        "    h@'https://${StorageAccountName}.blob.core.windows.net/${Container}/;${AccessKey}' " 
+        "    h@'https://${StorageAccountName}.blob.core.windows.net/${UriPath}/;${AccessKey}' " 
         ") "
         "with ( "
         "    compressed = true,"

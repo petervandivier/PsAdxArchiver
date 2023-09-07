@@ -6,7 +6,7 @@
 
 @{
     RootModule = 'PsAdxArchiver.psm1'
-    ModuleVersion = '0.1.0'
+    ModuleVersion = '0.1.1'
     Guid = '6db49c4c-0073-44fe-95d8-907f056c1645'
     Author = 'Peter Vandivier'
     Copyright = '(c) Peter Vandivier. All rights reserved.'
