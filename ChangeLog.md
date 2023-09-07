@@ -5,6 +5,7 @@
 Thursday, 7th September, 2023
 
 - adds support for subdirectories in container path
+- bugfixes standard/non-UnixTime table DDL from New-XbTable
 
 ## 0.1.0
 

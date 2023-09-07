@@ -46,8 +46,9 @@ function Start-XbAsyncArchive {
         [string]
         $TimestampColumnName,
 
-        [ValidateSet('second','millisecond')]
+        [ValidateSet('second','millisecond','')]
         [AllowNull()]
+        [AllowEmptyString()]
         [string]
         $UnixTime,
 
@@ -57,11 +58,11 @@ function Start-XbAsyncArchive {
 
     $UnixTime = $UnixTime.ToLower()
     $EpochOffset = switch ($UnixTime) {
-        'Second'      { 62135596800 }
-        'Millisecond' { 62135596800000 }
+        'second'      { 62135596800 }
+        'millisecond' { 62135596800000 }
     }
 
-    if($null -Ne 'UnixTime'){
+    if(-not [string]::IsNullOrEmpty($UnixTime)){
         $LowBound = "tolong((datetime($startStr)/timespan(1 $UnixTime))-$EpochOffset)"
         $HighBound = "tolong((datetime($endStr)/timespan(1 $UnixTime))-$EpochOffset)"
     } else {
@@ -76,7 +77,7 @@ function Start-XbAsyncArchive {
         "| where $TimestampColumnName <  $HighBound"
     ) -join "`n"
 
-    if($null -Ne 'UnixTime'){
+    if(-not [string]::IsNullOrEmpty($UnixTime)){
         $exportAsyncCmd += "`n"
         $exportAsyncCmd += @(
             "| extend ${TimestampColumnName}_DT = unixtime_${UnixTime}s_todatetime(${TimestampColumnName})"
