@@ -49,6 +49,11 @@ function Export-XbTable {
         [string]
         $TableName,
 
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $ExternalTableName,
+
         [Parameter(Mandatory)]
         [string]
         $TimestampColumnName,
@@ -113,6 +118,7 @@ function Export-XbTable {
         ClusterUrl = $ClusterUrl
         DatabaseName = $DatabaseName
         TableName = $TableName
+        ExternalTableName = $ExternalTableName
         TimestampColumnName = $TimestampColumnName
     }
 

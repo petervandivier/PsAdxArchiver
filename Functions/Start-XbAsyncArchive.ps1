@@ -42,6 +42,10 @@ function Start-XbAsyncArchive {
         [string]
         $TableName,
 
+        [Parameter()]
+        [string]
+        $ExternalTableName,
+
         [Parameter(Mandatory)]
         [string]
         $TimestampColumnName,
@@ -70,8 +74,12 @@ function Start-XbAsyncArchive {
         $HighBound = "datetime($endStr)"
     }
 
+    if([string]::IsNullOrEmpty($ExternalTableName)){
+        $ExternalTableName = "ext$TableName"
+    }
+
     $exportAsyncCmd = @(
-        ".export async to table ext$TableName <|"
+        ".export async to table $ExternalTableName <|"
         "$TableName"
         "| where $TimestampColumnName >= $LowBound"
         "| where $TimestampColumnName <  $HighBound"
@@ -114,6 +122,7 @@ function Start-XbAsyncArchive {
         ClusterUrl          = $ClusterUrl
         DatabaseName        = $DatabaseName
         TableName           = $TableName
+        ExternalTableName   = $ExternalTableName
         TimestampColumnName = $TimestampColumnName 
         OperationId         = $command.OperationId
     }

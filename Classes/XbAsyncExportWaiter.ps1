@@ -9,6 +9,7 @@ class XbAsyncExportWaiter {
     [ValidateNotNullOrEmpty()][string]$ClusterUrl
     [ValidateNotNullOrEmpty()][string]$DatabaseName
     [ValidateNotNullOrEmpty()][string]$TableName
+    [ValidateNotNullOrEmpty()][string]$ExternalTableName
     [ValidateNotNullOrEmpty()][string]$TimestampColumnName
     [string]$Prefix
     [ValidateNotNullOrEmpty()][guid]$OperationId
@@ -24,6 +25,7 @@ class XbAsyncExportWaiter {
         $this.ClusterUrl          = $InputObject.ClusterUrl
         $this.DatabaseName        = $InputObject.DatabaseName
         $this.TableName           = $InputObject.TableName
+        $this.ExternalTableName   = $InputObject.ExternalTableName
         $this.TimestampColumnName = $InputObject.TimestampColumnName
         $this.Prefix              = $InputObject.Prefix
         $this.OperationId         = $InputObject.OperationId

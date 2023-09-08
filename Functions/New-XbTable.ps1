@@ -41,6 +41,11 @@ function New-XbTable {
         [string]
         $TableName,
 
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $ExternalTableName,
+
         [Parameter(Mandatory)]
         [string]
         $TimestampColumnName,
@@ -76,6 +81,11 @@ function New-XbTable {
 
     $TableSchema = Invoke-AdxCmd @Connection -Command ".show table ['$TableName'] cslschema"
 
+    if($PsBoundParameters.Keys -contains 'ExternalTableName'){
+        $TableSchema.TableName = $ExternalTableName
+    } else {
+    }
+    
     $TableSchema.TableName = "ext${TableName}"
     $TableSchema.Folder = $null
     $TableSchema.DocString = $null
