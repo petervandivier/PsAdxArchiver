@@ -56,7 +56,11 @@ function Receive-XbAsyncArchive {
             RowCount = $ResultBlob.RowCount.ToString()
             SizeInBytes = $ResultBlob.SizeInBytes.ToString()
         }
-        Set-AzStorageBlobTag -Tag $Tags -Container $Container -Blob $blob.Name -Context $Context | Out-Null
+        if($Waiter.Prefix.Contains("/")){
+            Write-Warning "Blob API is not yet supported for hierarchical namespace accounts. Skipping tagging."
+        }else{
+            Set-AzStorageBlobTag -Tag $Tags -Container $Container -Blob $blob.Name -Context $Context | Out-Null
+        }
     }
 
     $Aggregate = $Blobs | ForEach-Object {$_.Length} | Measure-Object -Sum 
