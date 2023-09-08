@@ -26,7 +26,7 @@ function New-XbTable {
 
         [Parameter()]
         [string]
-        $Prefix,
+        $Directory,
 
         [Parameter(Mandatory)]
         [ValidateScript({$_.EndsWith(';Fed=True')})]
@@ -101,10 +101,10 @@ function New-XbTable {
         $PathFormat = "pathformat = (`"${TimestampColumnName}_DT=`" datetime_pattern(`"yyyy-MM-dd`", ${TimestampColumnName}_DT))"
     }
 
-    if([string]::IsNullOrEmpty($Prefix)){
+    if([string]::IsNullOrEmpty($Directory)){
         $UriPath = $Container
     } else {
-        $UriPath = "$Container/$Prefix"
+        $UriPath = "$Container/$Directory"
     }
 
     $TableDdl += @(

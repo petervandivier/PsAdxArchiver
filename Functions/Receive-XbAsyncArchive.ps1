@@ -43,7 +43,7 @@ function Receive-XbAsyncArchive {
 
     $Context = New-AzStorageContext -StorageAccountName $StorageAccountName -UseConnectedAccount
 
-    $Blobs = $Context | Get-AzStorageBlob -Container $Container | Where-Object { 
+    $Blobs = $Context | Get-AzStorageBlob -Container $Container -Prefix $Waiter.Prefix | Where-Object { 
         $_.Name -in $ResultBlobs.Name
     }
 

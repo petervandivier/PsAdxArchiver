@@ -61,6 +61,7 @@ function Wait-XbAsyncArchive {
                 break 
             }
         }
+
         $Waiter.State = $operation.State
         $Waiter.Duration = $operation.Duration
         $Waiter

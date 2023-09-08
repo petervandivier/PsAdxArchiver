@@ -33,6 +33,11 @@ function Export-XbTable {
         $Container,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $Directory,
+
+        [Parameter()]
         [string]
         $LogFile,
 
@@ -152,11 +157,15 @@ function Export-XbTable {
         $Batches = $IndexStart .. $IndexEnd | ForEach-Object {
             $startStr = $Bounds[$_].Start
             $endStr   = $Bounds[$_].End
-            $prefix   = $Bounds[$_].Label
+            $label   = $Bounds[$_].Label
+            $prefix   = "${TimestampColumnName}=${label}"
+            if($PsBoundParameters.Keys.Contains('Directory')){
+                $prefix = "$Directory/$prefix"
+            }
             Write-Verbose "Initializing parallel batch; IndexPosition: '$_', Start: '$startStr', End: '$endStr'"
             if($DoExecute){
                 $Operation = Start-XbAsyncArchive -Start $startStr -End $endStr -UnixTime $UnixTime @AdxTableSpec
-                $Operation.Prefix = "${TimestampColumnName}=${prefix}"
+                $Operation.Prefix = $prefix
                 $Operation
             } else {
                 Start-XbAsyncArchive -Start $startStr -End $endStr -UnixTime $UnixTime @AdxTableSpec -NoExecute

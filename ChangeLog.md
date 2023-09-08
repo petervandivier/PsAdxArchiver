@@ -8,6 +8,7 @@ Thursday, 7th September, 2023
 - bugfixes standard/non-UnixTime table DDL from New-XbTable
 - supports external name that does NOT exactly match source table
     - previously, the external table name needed to be exactly the source table name prefixed with "ext"
+- filters on known prefix to speed up pre-tag blob retreival in Receive phase
 
 ## 0.1.0
 
