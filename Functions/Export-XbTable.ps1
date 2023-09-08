@@ -63,6 +63,11 @@ function Export-XbTable {
         [string]
         $TimestampColumnName,
 
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $PathFormatColumnName,
+
         [Parameter(
             Mandatory,
             ParameterSetName='Timespan'
@@ -157,8 +162,12 @@ function Export-XbTable {
         $Batches = $IndexStart .. $IndexEnd | ForEach-Object {
             $startStr = $Bounds[$_].Start
             $endStr   = $Bounds[$_].End
-            $label   = $Bounds[$_].Label
-            $prefix   = "${TimestampColumnName}=${label}"
+            $label    = $Bounds[$_].Label
+            if($PsBoundParameters.Keys.Contains('PathFormatColumnName')){
+                $prefix = "${PathFormatColumnName}=${label}"
+            } else {
+                $prefix = "${TimestampColumnName}=${label}"
+            }
             if($PsBoundParameters.Keys.Contains('Directory')){
                 $prefix = "$Directory/$prefix"
             }
