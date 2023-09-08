@@ -84,9 +84,9 @@ function New-XbTable {
     if($PsBoundParameters.Keys -contains 'ExternalTableName'){
         $TableSchema.TableName = $ExternalTableName
     } else {
+        $TableSchema.TableName = "ext${TableName}"
     }
     
-    $TableSchema.TableName = "ext${TableName}"
     $TableSchema.Folder = $null
     $TableSchema.DocString = $null
 
