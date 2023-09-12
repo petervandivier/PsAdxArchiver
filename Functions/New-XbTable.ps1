@@ -24,6 +24,10 @@ function New-XbTable {
         [string]
         $Container,
 
+        [Parameter()]
+        [string]
+        $Directory,
+
         [Parameter(Mandatory)]
         [ValidateScript({$_.EndsWith(';Fed=True')})]
         [string]
@@ -37,9 +41,19 @@ function New-XbTable {
         [string]
         $TableName,
 
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $ExternalTableName,
+
         [Parameter(Mandatory)]
         [string]
         $TimestampColumnName,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $PathFormatColumnName,
 
         [ValidateSet('second','millisecond')]
         [AllowNull()]
@@ -72,19 +86,34 @@ function New-XbTable {
 
     $TableSchema = Invoke-AdxCmd @Connection -Command ".show table ['$TableName'] cslschema"
 
-    $TableSchema.TableName = "ext${TableName}"
+    if($PsBoundParameters.Keys -contains 'ExternalTableName'){
+        $TableSchema.TableName = $ExternalTableName
+    } else {
+        $TableSchema.TableName = "ext${TableName}"
+    }
+    
     $TableSchema.Folder = $null
     $TableSchema.DocString = $null
 
     $TableDdl = ConvertTo-AdxCreateTableCmd $TableSchema
     $TableDdl = $TableDdl.Replace('.create-merge table','.create external table')
+
+    if(-Not $PsBoundParameters.Keys.Contains('PathFormatColumnName')){
+        $PathFormatColumnName = $TimestampColumnName
+    }
     if([string]::IsNullOrEmpty($UnixTime)){
         $PartitionBy = "partition by (${TimestampColumnName}:datetime = startofday($TimestampColumnName))"
-        $PathFormat = "pathformat = (`"$TimestampColumnName=`" datetime_pattern(`"yyyy-MM-dd`", $TimestampColumnName))"
+        $PathFormat = "pathformat = (`"${PathFormatColumnName}=`" datetime_pattern(`"yyyy-MM-dd`", ${PathFormatColumnName}))"
     } else {
         $TableDdl = $TableDdl.Replace("table ext${TableName} (","table ext${TableName} (`n    ${TimestampColumnName}_DT: datetime,")
         $PartitionBy = "partition by (${TimestampColumnName}_DT:datetime = startofday(${TimestampColumnName}_DT))"
-        $PathFormat = "pathformat = (`"${TimestampColumnName}_DT=`" datetime_pattern(`"yyyy-MM-dd`", ${TimestampColumnName}_DT))"
+        $PathFormat = "pathformat = (`"${PathFormatColumnName}_DT=`" datetime_pattern(`"yyyy-MM-dd`", ${PathFormatColumnName}_DT))"
+    }
+
+    if([string]::IsNullOrEmpty($Directory)){
+        $UriPath = $Container
+    } else {
+        $UriPath = "$Container/$Directory"
     }
 
     $TableDdl += @(
@@ -94,7 +123,7 @@ function New-XbTable {
         "$PathFormat"
         "dataformat = parquet "
         "("
-        "    h@'https://${StorageAccountName}.blob.core.windows.net/${Container}/;${AccessKey}' " 
+        "    h@'https://${StorageAccountName}.blob.core.windows.net/${UriPath}/;${AccessKey}' " 
         ") "
         "with ( "
         "    compressed = true,"

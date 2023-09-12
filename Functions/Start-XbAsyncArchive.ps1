@@ -42,12 +42,17 @@ function Start-XbAsyncArchive {
         [string]
         $TableName,
 
+        [Parameter()]
+        [string]
+        $ExternalTableName,
+
         [Parameter(Mandatory)]
         [string]
         $TimestampColumnName,
 
-        [ValidateSet('second','millisecond')]
+        [ValidateSet('second','millisecond','')]
         [AllowNull()]
+        [AllowEmptyString()]
         [string]
         $UnixTime,
 
@@ -57,11 +62,11 @@ function Start-XbAsyncArchive {
 
     $UnixTime = $UnixTime.ToLower()
     $EpochOffset = switch ($UnixTime) {
-        'Second'      { 62135596800 }
-        'Millisecond' { 62135596800000 }
+        'second'      { 62135596800 }
+        'millisecond' { 62135596800000 }
     }
 
-    if($null -Ne 'UnixTime'){
+    if(-not [string]::IsNullOrEmpty($UnixTime)){
         $LowBound = "tolong((datetime($startStr)/timespan(1 $UnixTime))-$EpochOffset)"
         $HighBound = "tolong((datetime($endStr)/timespan(1 $UnixTime))-$EpochOffset)"
     } else {
@@ -69,14 +74,18 @@ function Start-XbAsyncArchive {
         $HighBound = "datetime($endStr)"
     }
 
+    if([string]::IsNullOrEmpty($ExternalTableName)){
+        $ExternalTableName = "ext$TableName"
+    }
+
     $exportAsyncCmd = @(
-        ".export async to table ext$TableName <|"
+        ".export async to table $ExternalTableName <|"
         "$TableName"
         "| where $TimestampColumnName >= $LowBound"
         "| where $TimestampColumnName <  $HighBound"
     ) -join "`n"
 
-    if($null -Ne 'UnixTime'){
+    if(-not [string]::IsNullOrEmpty($UnixTime)){
         $exportAsyncCmd += "`n"
         $exportAsyncCmd += @(
             "| extend ${TimestampColumnName}_DT = unixtime_${UnixTime}s_todatetime(${TimestampColumnName})"
@@ -113,6 +122,7 @@ function Start-XbAsyncArchive {
         ClusterUrl          = $ClusterUrl
         DatabaseName        = $DatabaseName
         TableName           = $TableName
+        ExternalTableName   = $ExternalTableName
         TimestampColumnName = $TimestampColumnName 
         OperationId         = $command.OperationId
     }

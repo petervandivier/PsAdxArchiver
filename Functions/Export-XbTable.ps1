@@ -33,6 +33,11 @@ function Export-XbTable {
         $Container,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $Directory,
+
+        [Parameter()]
         [string]
         $LogFile,
 
@@ -49,9 +54,19 @@ function Export-XbTable {
         [string]
         $TableName,
 
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $ExternalTableName,
+
         [Parameter(Mandatory)]
         [string]
         $TimestampColumnName,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $PathFormatColumnName,
 
         [Parameter(
             Mandatory,
@@ -113,6 +128,7 @@ function Export-XbTable {
         ClusterUrl = $ClusterUrl
         DatabaseName = $DatabaseName
         TableName = $TableName
+        ExternalTableName = $ExternalTableName
         TimestampColumnName = $TimestampColumnName
     }
 
@@ -146,11 +162,19 @@ function Export-XbTable {
         $Batches = $IndexStart .. $IndexEnd | ForEach-Object {
             $startStr = $Bounds[$_].Start
             $endStr   = $Bounds[$_].End
-            $prefix   = $Bounds[$_].Label
+            $label    = $Bounds[$_].Label
+            if($PsBoundParameters.Keys.Contains('PathFormatColumnName')){
+                $prefix = "${PathFormatColumnName}=${label}"
+            } else {
+                $prefix = "${TimestampColumnName}=${label}"
+            }
+            if($PsBoundParameters.Keys.Contains('Directory')){
+                $prefix = "$Directory/$prefix"
+            }
             Write-Verbose "Initializing parallel batch; IndexPosition: '$_', Start: '$startStr', End: '$endStr'"
             if($DoExecute){
                 $Operation = Start-XbAsyncArchive -Start $startStr -End $endStr -UnixTime $UnixTime @AdxTableSpec
-                $Operation.Prefix = "${TimestampColumnName}=${prefix}"
+                $Operation.Prefix = $prefix
                 $Operation
             } else {
                 Start-XbAsyncArchive -Start $startStr -End $endStr -UnixTime $UnixTime @AdxTableSpec -NoExecute
