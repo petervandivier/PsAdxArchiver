@@ -118,6 +118,15 @@ function Export-XbTable {
 
     $DoExecute = -Not $NoExecute
 
+    if(-not [string]::IsNullOrWhiteSpace($LogFile)){
+        Try { 
+            [io.file]::OpenWrite($LogFile).close() 
+        } Catch { 
+            throw "Unable to write to output file '$LogFile'";
+            return
+        }
+    }
+
     $receiveSplat = @{
         StorageAccountName = $StorageAccountName
         Container = $Container
