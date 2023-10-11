@@ -43,6 +43,8 @@ function Receive-XbAsyncArchive {
 
     $Context = New-AzStorageContext -StorageAccountName $StorageAccountName -UseConnectedAccount
 
+    $StorageAccount = Get-AzStorageAccount | Where-Object StorageAccountName -eq $StorageAccountName
+
     $Blobs = $Context | Get-AzStorageBlob -Container $Container -Prefix $Waiter.Prefix | Where-Object { 
         $_.Name -in $ResultBlobs.Name
     }
@@ -56,7 +58,10 @@ function Receive-XbAsyncArchive {
             RowCount = $ResultBlob.RowCount.ToString()
             SizeInBytes = $ResultBlob.SizeInBytes.ToString()
         }
-        if($Waiter.Prefix.Contains("/")){
+        if(
+            $Waiter.Prefix.Contains("/") -Or
+            $true -eq $StorageAccount.EnableHierarchicalNamespace
+        ){
             Write-Warning "Blob API is not yet supported for hierarchical namespace accounts. Skipping tagging."
         }else{
             Set-AzStorageBlobTag -Tag $Tags -Container $Container -Blob $blob.Name -Context $Context | Out-Null
