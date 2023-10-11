@@ -33,7 +33,6 @@ function Export-XbTable {
         $Container,
 
         [Parameter()]
-        [ValidateNotNullOrEmpty()]
         [string]
         $Directory,
 
@@ -64,7 +63,6 @@ function Export-XbTable {
         $TimestampColumnName,
 
         [Parameter()]
-        [ValidateNotNullOrEmpty()]
         [string]
         $PathFormatColumnName,
 
@@ -172,12 +170,18 @@ function Export-XbTable {
             $startStr = $Bounds[$_].Start
             $endStr   = $Bounds[$_].End
             $label    = $Bounds[$_].Label
-            if($PsBoundParameters.Keys.Contains('PathFormatColumnName')){
+            if(
+                $PsBoundParameters.Keys.Contains('PathFormatColumnName') -And
+                -Not [string]::IsNullOrWhiteSpace($PathFormatColumnName)
+            ){
                 $prefix = "${PathFormatColumnName}=${label}"
             } else {
                 $prefix = "${TimestampColumnName}=${label}"
             }
-            if($PsBoundParameters.Keys.Contains('Directory')){
+            if(
+                $PsBoundParameters.Keys.Contains('Directory') -And
+                -Not [string]::IsNullOrWhiteSpace($Directory)
+            ){
                 $prefix = "$Directory/$prefix"
             }
             Write-Verbose "Initializing parallel batch; IndexPosition: '$_', Start: '$startStr', End: '$endStr'"
