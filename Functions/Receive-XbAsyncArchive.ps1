@@ -1,5 +1,10 @@
 
 function Receive-XbAsyncArchive {
+<#
+.Parameter NoTag
+    Do not tag blobs with metadata. If you know your blobs cannot receive tags but do not
+    otherwise meet the criteria to abort the tag flow, use this switch to suppress errors.
+#>
     [CmdletBinding()]
     Param (
         [Parameter(Mandatory,ValueFromPipeline)]
@@ -15,7 +20,10 @@ function Receive-XbAsyncArchive {
         $Container,
 
         [string]
-        $LogFile
+        $LogFile,
+
+        [switch]
+        $NoTag
     )
 
     $AdxConnection = @{
@@ -49,22 +57,26 @@ function Receive-XbAsyncArchive {
         $_.Name -in $ResultBlobs.Name
     }
 
-    foreach($blob in $Blobs) {
-        $ResultBlob = $ResultBlobs | Where-Object Name -eq $blob.Name
-        $Tags = @{
-            OperationId = $Waiter.OperationId.ToString()
-            Start = $Waiter.Start.ToString('u')
-            End = $Waiter.End.ToString('u')
-            RowCount = $ResultBlob.RowCount.ToString()
-            SizeInBytes = $ResultBlob.SizeInBytes.ToString()
-        }
-        if(
-            $Waiter.Prefix.Contains("/") -Or
-            $true -eq $StorageAccount.EnableHierarchicalNamespace
-        ){
-            Write-Warning "Blob API is not yet supported for hierarchical namespace accounts. Skipping tagging."
-        }else{
-            Set-AzStorageBlobTag -Tag $Tags -Container $Container -Blob $blob.Name -Context $Context | Out-Null
+    if($NoTag) {
+        Write-Verbose "Skipping tagging by user request."
+    } else {
+        foreach($blob in $Blobs) {
+            $ResultBlob = $ResultBlobs | Where-Object Name -eq $blob.Name
+            $Tags = @{
+                OperationId = $Waiter.OperationId.ToString()
+                Start = $Waiter.Start.ToString('u')
+                End = $Waiter.End.ToString('u')
+                RowCount = $ResultBlob.RowCount.ToString()
+                SizeInBytes = $ResultBlob.SizeInBytes.ToString()
+            }
+            if(
+                $Waiter.Prefix.Contains("/") -Or
+                $true -eq $StorageAccount.EnableHierarchicalNamespace
+            ){
+                Write-Warning "Blob API is not yet supported for hierarchical namespace accounts. Skipping tagging."
+            }else{
+                Set-AzStorageBlobTag -Tag $Tags -Container $Container -Blob $blob.Name -Context $Context | Out-Null
+            }
         }
     }
 

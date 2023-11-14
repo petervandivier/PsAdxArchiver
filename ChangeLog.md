@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.1.2
+
+Tuesday, 14th November, 2023
+
+- supports user suppression of storage tagging flow
+
 ## 0.1.1
 
 Thursday, 7th September, 2023

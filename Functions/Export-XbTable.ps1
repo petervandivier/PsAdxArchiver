@@ -111,7 +111,10 @@ function Export-XbTable {
         $UnixTime,
 
         [switch]
-        $NoExecute
+        $NoExecute,
+
+        [switch]
+        $NoTag
     )
 
     $DoExecute = -Not $NoExecute
@@ -129,6 +132,7 @@ function Export-XbTable {
         StorageAccountName = $StorageAccountName
         Container = $Container
         LogFile = $LogFile
+        NoTag = $NoTag
     }
 
     $AdxTableSpec = @{
