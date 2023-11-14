@@ -41,7 +41,7 @@ $externalTableRowcounts = $bounds | ForEach-Object {
     ) -join "`n"
 
     $queryStart = Get-Date
-    Write-Host "$queryStart`: polling $startStr"
+    Write-Host "$(Get-Date $queryStart -Format o) - polling $startStr"
     $result = Invoke-AdxCmd @AdxDatabase -Query $query
     $duration = (Get-Date) - $queryStart
     [PsCustomObject]@{
