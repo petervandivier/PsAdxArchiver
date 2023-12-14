@@ -29,10 +29,10 @@ function Wait-XbAsyncArchive {
 
         $OperationName = "Operation: '$($Waiter.OperationId)'"
         if($Waiter.Start){
-            $OperationName += ", Start: '$($Waiter.Start)'"
+            $OperationName += ", Start: '$($Waiter.Start.ToString('o'))'"
         }
         if($Waiter.End){
-            $OperationName += ", End: '$($Waiter.End)'"
+            $OperationName += ", End: '$($Waiter.End.ToString('o'))'"
         }
 
         while($true){
