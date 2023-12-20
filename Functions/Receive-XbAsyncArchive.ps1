@@ -68,6 +68,7 @@ function Receive-XbAsyncArchive {
                 End = $Waiter.End.ToString('u')
                 RowCount = $ResultBlob.RowCount.ToString()
                 SizeInBytes = $ResultBlob.SizeInBytes.ToString()
+                UploadedAt = [DateTime]::UtcNow.ToString('u')
             }
             if(
                 $Waiter.Prefix.Contains("/") -Or
