@@ -231,8 +231,14 @@ function Export-XbTable {
                 }
             } | Measure-Object -Average).Average
 
+            $ExportedMb          = $ExportedMb.ToString('N2')
+            $BlobCount           = $BlobCount.ToString('N0')
+            $WaitSerialMbPerSec  = $WaitSerialMbPerSec.ToString('N2')
+            $TotalSerialMbPerSec = $TotalSerialMbPerSec.ToString('N2')
+            $AverageMbPerSec     = $AverageMbPerSec.ToString('N2')
+
             $Status = @(
-                "Completed '$($Batches.Count)' batches for '$($Bounds[$IndexStart].Start)' to '$($Bounds[$IndexEnd].End)'. "
+                "Completed '$($Batches.Count)' batches for range '$($Bounds[$IndexStart].Start)' t '$($Bounds[$IndexEnd].End)'. "
                 "- Exported Mb: '$ExportedMb'. "
                 "- Count blobs: '$BlobCount'. "
                 "- Serial export duration: '$WaitDurationStr'. "
