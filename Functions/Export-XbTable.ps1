@@ -251,6 +251,10 @@ function Export-XbTable {
 
             New-BurntToastNotification -Text $Status
             Write-Host $Status -ForegroundColor Green
+            Write-Host "Sleeping 15 seconds to allow inter-batch cancellation. Use Ctrl+C to cancel..." 
+            Start-Sleep -Seconds 15
         }
+        # end DoExecute
     }
+    # end foreach batch
 }
